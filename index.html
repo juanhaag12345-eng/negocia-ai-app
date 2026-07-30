@@ -345,44 +345,6 @@
     <div id="precos-ia-resultados" style="display:none;flex-direction:column;gap:8px;"></div>
   </div>
 
-  <p style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Exemplo de referência (dados ilustrativos)</p>
-  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px;">
-    <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px;text-align:center;"><p style="font-size:11px;color:var(--text-secondary);margin-bottom:2px;">Menor</p><p style="font-size:15px;font-weight:500;">R$ 8,49</p></div>
-    <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px;text-align:center;"><p style="font-size:11px;color:var(--text-secondary);margin-bottom:2px;">Média</p><p style="font-size:15px;font-weight:500;">R$ 9,20</p></div>
-    <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px;text-align:center;"><p style="font-size:11px;color:var(--text-secondary);margin-bottom:2px;">Maior</p><p style="font-size:15px;font-weight:500;">R$ 10,10</p></div>
-  </div>
-
-  <div style="border-top:0.5px solid var(--border);margin:16px 0;padding-top:14px;">
-    <p style="font-size:13px;font-weight:500;margin-bottom:4px;">Estabelecimentos próximos de você</p>
-    <p style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">Usa sua localização real. Não lemos o preço exato de cada site automaticamente — mas geramos uma busca pronta pra você conferir com 1 toque.</p>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-      <div style="flex:1;">
-        <label style="font-size:11px;color:var(--text-secondary);">Raio de busca (km)</label>
-        <input type="number" id="raio-km" value="3" min="0.5" max="20" step="0.5" style="margin-top:2px;" />
-      </div>
-      <button type="button" onclick="buscarEstabelecimentosProximos()" style="flex-shrink:0;padding:9px 14px;font-size:13px;align-self:flex-end;">Buscar</button>
-    </div>
-    <p id="regiao-status" style="display:none;font-size:12px;margin-bottom:10px;"></p>
-    <div id="regiao-resultados" style="display:none;flex-direction:column;gap:8px;"></div>
-  </div>
-
-  <div style="border-top:0.5px solid var(--border);margin-top:16px;padding-top:14px;">
-    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Preço de venda por estabelecimento (exemplo)</p>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-        <div style="display:flex;justify-content:space-between;"><span style="font-size:14px;font-weight:500;">Mercado Bom Preço</span><span style="font-size:14px;">R$ 8,49</span></div>
-        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Rua das Flores, 120 · 380 m</p>
-      </div>
-      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-        <div style="display:flex;justify-content:space-between;"><span style="font-size:14px;font-weight:500;">Super Vitória</span><span style="font-size:14px;">R$ 9,30</span></div>
-        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Av. Central, 45 · 900 m</p>
-      </div>
-      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-        <div style="display:flex;justify-content:space-between;"><span style="font-size:14px;font-weight:500;">Mercearia Silva</span><span style="font-size:14px;">R$ 10,10</span></div>
-        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Rua 7 de Setembro, 88 · 1.4 km</p>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div id="screen-calculadoras" style="padding:16px;flex:1;display:none;">
