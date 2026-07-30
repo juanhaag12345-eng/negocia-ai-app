@@ -1538,7 +1538,7 @@ function buscarPrecosComIA(){
   navigator.geolocation.getCurrentPosition(async function(pos){
     var lat = pos.coords.latitude;
     var lon = pos.coords.longitude;
-    mostrarStatusPrecosIA('Procurando estabelecimentos com e-commerce por perto...');
+    mostrarStatusPrecosIA('Procurando estabelecimentos por perto...');
     var itens;
     try {
       itens = await obterItensOSM(lat, lon, raioKm);
@@ -1546,19 +1546,22 @@ function buscarPrecosComIA(){
       mostrarStatusPrecosIA('Não foi possível buscar estabelecimentos agora (serviço público pode estar sobrecarregado). Tente novamente.', true);
       return;
     }
-    var comSite = itens.filter(function(it){ return !!it.website; });
-    if (comSite.length === 0) {
-      mostrarStatusPrecosIA('Nenhum estabelecimento próximo (raio de ' + raioKm + ' km) tem site/e-commerce cadastrado. Não é possível buscar o preço automaticamente — tente aumentar o raio, ou confira manualmente na lista "Estabelecimentos próximos" abaixo.', true);
+    if (itens.length === 0) {
+      mostrarStatusPrecosIA('Nenhum estabelecimento encontrado num raio de ' + raioKm + ' km. Tente aumentar o raio.', true);
       return;
     }
-    mostrarStatusPrecosIA('Verificando o preço em ' + comSite.length + ' site' + (comSite.length > 1 ? 's' : '') + ' próximo' + (comSite.length > 1 ? 's' : '') + '...');
+    // Não exige mais que o OpenStreetMap já tenha o site cadastrado (a maioria
+    // dos estabelecimentos não tem essa informação preenchida lá) — manda os
+    // nomes/endereços e deixa a IA achar e conferir o site oficial de cada um.
+    var candidatos = itens.slice(0, 12);
+    mostrarStatusPrecosIA('Verificando o preço em ' + candidatos.length + ' estabelecimento' + (candidatos.length > 1 ? 's' : '') + ' próximo' + (candidatos.length > 1 ? 's' : '') + '...');
     try {
       var resp = await fetch(PRECOS_IA_WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Negocia-Key': PRECOS_IA_CHAVE_APP },
         body: JSON.stringify({
-          estabelecimentos: comSite.slice(0, 10).map(function(it){
-            return { nome: it.nome, website: it.website, distanciaKm: it.distanciaKm };
+          estabelecimentos: candidatos.map(function(it){
+            return { nome: it.nome, website: it.website || null, endereco: it.endereco || null, distanciaKm: it.distanciaKm };
           }),
           produto: PRODUTO_ATUAL ? PRODUTO_ATUAL.nome : ''
         })
@@ -1570,7 +1573,7 @@ function buscarPrecosComIA(){
       }
       esconderStatusPrecosIA();
       if (!json.resultados || json.resultados.length === 0) {
-        mostrarStatusPrecosIA('Verificamos ' + comSite.length + ' site' + (comSite.length > 1 ? 's' : '') + ' próximo' + (comSite.length > 1 ? 's' : '') + ' e nenhum divulga o preço desse produto online.' + (json.observacao ? (' ' + json.observacao) : ''), true);
+        mostrarStatusPrecosIA('Verificamos ' + candidatos.length + ' estabelecimento' + (candidatos.length > 1 ? 's' : '') + ' próximo' + (candidatos.length > 1 ? 's' : '') + ' e nenhum tem esse produto com preço divulgado num site oficial.' + (json.observacao ? (' ' + json.observacao) : ''), true);
         return;
       }
       renderPrecosIA(json.resultados, json.observacao, json.fontes);
