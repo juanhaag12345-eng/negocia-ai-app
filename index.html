@@ -1662,34 +1662,36 @@ function renderEstabelecimentosProximos(itens){
 }
 var OSM_ESPELHOS = [
   'https://overpass-api.de/api/interpreter',
+  'https://lz4.overpass-api.de/api/interpreter',
+  'https://overpass.osm.ch/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.openstreetmap.ru/api/interpreter'
+  'https://overpass.private.coffee/api/interpreter'
 ];
-async function buscarComTimeout(url, opcoes, ms){
+async function buscarUmEspelho(url, opcoes, ms){
   var ctrl = new AbortController();
   var timer = setTimeout(function(){ ctrl.abort(); }, ms);
   try {
-    return await fetch(url, Object.assign({}, opcoes, { signal: ctrl.signal }));
+    var resp = await fetch(url, Object.assign({}, opcoes, { signal: ctrl.signal }));
+    if (!resp.ok) throw new Error('overpass falhou (status ' + resp.status + ')');
+    return await resp.json();
   } finally {
     clearTimeout(timer);
   }
 }
 async function obterItensOSM(lat, lon, raioKm){
   var raioMetros = Math.round(raioKm * 1000);
-  var query = '[out:json][timeout:25];(node["shop"](around:' + raioMetros + ',' + lat + ',' + lon + ');way["shop"](around:' + raioMetros + ',' + lat + ',' + lon + '););out center tags;';
-  var ultimoErro = null;
+  var query = '[out:json][timeout:20];(node["shop"](around:' + raioMetros + ',' + lat + ',' + lon + ');way["shop"](around:' + raioMetros + ',' + lat + ',' + lon + '););out center tags;';
+  // Consulta vários espelhos públicos do OSM em paralelo (o serviço gratuito
+  // é instável) e usa o primeiro que responder — em vez de esperar um por
+  // um, o que deixaria a busca muito lenta quando algum está fora do ar.
   var json = null;
-  for (var i = 0; i < OSM_ESPELHOS.length; i++) {
-    try {
-      var resp = await buscarComTimeout(OSM_ESPELHOS[i], { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 15000);
-      if (!resp.ok) { ultimoErro = new Error('overpass falhou (status ' + resp.status + ')'); continue; }
-      json = await resp.json();
-      break;
-    } catch (e) {
-      ultimoErro = e;
-    }
+  try {
+    json = await Promise.any(OSM_ESPELHOS.map(function(url){
+      return buscarUmEspelho(url, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 12000);
+    }));
+  } catch (e) {
+    throw new Error('todos os espelhos do OSM falharam');
   }
-  if (!json) throw (ultimoErro || new Error('overpass falhou'));
   var tiposRelevantes = ['supermarket', 'convenience', 'grocery', 'department_store', 'general', 'kiosk', 'wholesale', 'mall', 'variety_store', 'beverages', 'alcohol', 'bakery'];
   var itens = (json.elements || []).map(function(el){
     var tags = el.tags || {};
