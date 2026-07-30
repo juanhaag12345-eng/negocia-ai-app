@@ -1,4 +1,4 @@
-const CACHE_NAME = 'negocia-ai-v1';
+const CACHE_NAME = 'negocia-ai-v2';
 const ASSETS = ['./index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function (event) {
@@ -21,18 +21,18 @@ self.addEventListener('activate', function (event) {
   self.clients.claim();
 });
 
+// Estratégia "network-first": sempre tenta buscar a versão mais nova na
+// internet primeiro (assim toda atualização do app aparece na hora),
+// e só usa o que está guardado no aparelho se estiver sem internet.
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      if (cached) return cached;
-      return fetch(event.request).then(function (response) {
-        var copy = response.clone();
-        caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, copy); });
-        return response;
-      }).catch(function () {
-        return cached;
-      });
+    fetch(event.request).then(function (response) {
+      var copy = response.clone();
+      caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, copy); });
+      return response;
+    }).catch(function () {
+      return caches.match(event.request);
     })
   );
 });
