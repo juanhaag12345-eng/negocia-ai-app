@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Negocia AI</title>
+<meta name="description" content="Copiloto comercial para negociação em campo" />
+<meta name="theme-color" content="#2563eb" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Negocia AI" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/dist/tabler-icons.min.css" />
+<style>
+  :root{
+    --surface-1:#f4f3f1;
+    --surface-2:#ffffff;
+    --text-primary:#1a1a19;
+    --text-secondary:#6b6a66;
+    --text-muted:#9c9b96;
+    --text-accent:#2563eb;
+    --text-success:#15803d;
+    --text-warning:#b45309;
+    --text-danger:#dc2626;
+    --bg-accent:#eaf1ff;
+    --bg-success:#eafbf1;
+    --bg-warning:#fef6e6;
+    --bg-danger:#fdecec;
+    --border:#e6e5e1;
+    --border-strong:#c9c8c2;
+    --border-accent:#2563eb;
+    --border-danger:#f3b6b6;
+    --radius:10px;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; height:100%; }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--surface-1);
+    color:var(--text-primary);
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
+  }
+  p{ margin:0; }
+  button{
+    font-family:inherit;
+    font-size:14px;
+    color:var(--text-primary);
+    background:var(--surface-2);
+    border:0.5px solid var(--border);
+    border-radius:var(--radius);
+    padding:8px 12px;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  button:active{ opacity:0.65; }
+  input,select,textarea{
+    font-family:inherit;
+    font-size:15px;
+    color:var(--text-primary);
+    background:var(--surface-2);
+    border:0.5px solid var(--border);
+    border-radius:var(--radius);
+    padding:9px 10px;
+    width:100%;
+    outline:none;
+  }
+  input:focus,select:focus,textarea:focus{ border-color:var(--border-accent); }
+  .app-shell{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100dvh;
+    background:var(--surface-2);
+    display:flex;
+    flex-direction:column;
+  }
+  .app-header{
+    padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px;
+    border-bottom:0.5px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    background:var(--surface-2);
+    z-index:5;
+  }
+  .bottom-nav{
+    display:flex;
+    border-top:0.5px solid var(--border);
+    background:var(--surface-2);
+    position:sticky;
+    bottom:0;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .nav-btn{
+    flex:1;border:none;border-radius:0;background:transparent;
+    padding:9px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+<div class="app-header">
+  <button type="button" onclick="toggleMenu()" style="border:none;background:transparent;padding:4px;" aria-label="Abrir menu"><i class="ti ti-menu-2" style="font-size:20px;color:var(--text-primary);" aria-hidden="true"></i></button>
+  <span style="font-weight:600;font-size:16px;">Negocia AI</span>
+  <button type="button" onclick="handleUserIconClick()" style="border:none;background:transparent;padding:2px;" aria-label="Conta"><i id="icon-user" class="ti ti-user-circle" style="font-size:20px;color:var(--text-secondary);" aria-hidden="true"></i></button>
+</div>
+
+<div id="menu-panel" style="display:none;padding:14px 16px;border-bottom:0.5px solid var(--border);background:var(--surface-1);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <p style="font-size:13px;font-weight:500;">Menu</p>
+    <button type="button" onclick="toggleMenu()" style="border:none;background:transparent;padding:2px;" aria-label="Fechar menu"><i class="ti ti-x" style="font-size:16px;" aria-hidden="true"></i></button>
+  </div>
+  <button type="button" onclick="abrirAjuda()" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 4px;text-align:left;background:transparent;border:none;">
+    <span style="font-size:13px;display:flex;align-items:center;gap:8px;"><i class="ti ti-help-circle" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>Como usar o Negocia AI</span>
+    <i class="ti ti-chevron-right" style="font-size:15px;color:var(--text-muted);" aria-hidden="true"></i>
+  </button>
+  <button type="button" onclick="abrirConfig()" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 4px;text-align:left;background:transparent;border:none;">
+    <span style="font-size:13px;display:flex;align-items:center;gap:8px;"><i class="ti ti-adjustments" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>Ajuste de preços sugeridos</span>
+    <i class="ti ti-chevron-right" style="font-size:15px;color:var(--text-muted);" aria-hidden="true"></i>
+  </button>
+</div>
+
+<div id="conta-panel" style="display:none;padding:14px 16px;border-bottom:0.5px solid var(--border);background:var(--surface-1);">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <div style="width:40px;height:40px;border-radius:999px;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <span id="conta-avatar-inicial" style="font-size:14px;font-weight:600;color:var(--text-accent);">U</span>
+    </div>
+    <div style="min-width:0;">
+      <p id="conta-nome" style="font-size:13px;font-weight:500;">Minha conta</p>
+      <p id="conta-email" style="font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
+    </div>
+  </div>
+  <span style="display:inline-block;font-size:10px;font-weight:600;color:var(--text-warning);background:var(--bg-warning);padding:3px 8px;border-radius:999px;margin-bottom:12px;">PLANO GRATUITO</span>
+  <button type="button" onclick="fazerLogout()" style="width:100%;padding:9px;font-size:13px;">Sair da conta</button>
+</div>
+
+<div id="ajuda-panel" style="display:none;padding:14px 16px;border-bottom:0.5px solid var(--border);background:var(--surface-1);">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+    <button type="button" onclick="voltarMenu()" style="border:none;background:transparent;padding:2px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i></button>
+    <p style="font-size:13px;font-weight:500;">Como usar o Negocia AI</p>
+  </div>
+
+  <p style="font-size:11px;color:var(--text-secondary);letter-spacing:0.03em;margin-bottom:8px;font-weight:600;">FLUXO DO PRODUTO</p>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><i class="ti ti-search" style="font-size:15px;color:var(--text-accent);" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;">Buscar</span></div>
+      <p style="font-size:12px;color:var(--text-secondary);">Identifique o produto por código de barras, foto, voz, texto ou toque numa busca recente. É o ponto de partida — o produto escolhido aqui acompanha você nas telas de Região e nas Calculadoras.</p>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><i class="ti ti-package" style="font-size:15px;color:var(--text-accent);" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;">Produto</span></div>
+      <p style="font-size:12px;color:var(--text-secondary);">Mostra os detalhes do item identificado (marca, categoria, código de barras, embalagem) e um argumento de venda pronto para usar na conversa com o cliente.</p>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><i class="ti ti-map-pin" style="font-size:15px;color:var(--text-accent);" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;">Região</span></div>
+      <p style="font-size:12px;color:var(--text-secondary);">Mostra o preço de venda ao consumidor praticado por estabelecimentos próximos, para você entender como o mercado está precificando esse produto na sua área.</p>
+    </div>
+  </div>
+
+  <p style="font-size:11px;color:var(--text-secondary);letter-spacing:0.03em;margin-bottom:8px;font-weight:600;">CALCULADORAS</p>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><i class="ti ti-calculator" style="font-size:15px;color:var(--text-accent);" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;">Preço</span></div>
+      <p style="font-size:12px;color:var(--text-secondary);">A partir do seu preço de custo, sugere três faixas de venda (baixo, competitivo, alto) com margem e markup de cada uma. Também mostra a margem se você usar o preço que o cliente propôs.</p>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><i class="ti ti-gift" style="font-size:15px;color:var(--text-warning);" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;">Bonificação</span></div>
+      <p style="font-size:12px;color:var(--text-secondary);">Simula promoções do tipo "compre X ganhe Y" e/ou um % de investimento liberado, calcula seu custo efetivo com a promoção e, na seção "Custo a praticar", diz quanto bonificar para chegar num custo-alvo.</p>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><i class="ti ti-percentage" style="font-size:15px;color:var(--text-success);" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;">Margem/Mark Up</span></div>
+      <p style="font-size:12px;color:var(--text-secondary);">Simulador detalhado que considera ICMS e Pis/Cofins de entrada e saída para calcular a margem de contribuição real e o markup bruto, a partir do custo e do preço de venda.</p>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><i class="ti ti-discount-2" style="font-size:15px;color:var(--text-danger);" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;">Sell Out</span></div>
+      <p style="font-size:12px;color:var(--text-secondary);">Você define o preço promocional e a margem que quer manter na ação — o app calcula quanto de investimento por unidade é necessário para bancar isso sem perder margem.</p>
+    </div>
+  </div>
+
+  <p style="font-size:11px;color:var(--text-secondary);letter-spacing:0.03em;margin-bottom:8px;font-weight:600;">ORGANIZAÇÃO</p>
+  <div style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><i class="ti ti-notes" style="font-size:15px;color:var(--text-accent);" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;">Notas</span></div>
+    <p style="font-size:12px;color:var(--text-secondary);">Registre observações por cliente (ex: trocas pendentes, cobranças). Cada nota pode ter um lembrete sincronizado com o Google Agenda e anexos de imagens ou arquivos.</p>
+  </div>
+
+  <div style="background:var(--bg-accent);border-radius:var(--radius);padding:10px 12px;">
+    <p style="font-size:12px;color:var(--text-accent);">Dica: em Menu → "Ajuste de preços sugeridos" você configura os percentuais usados nas faixas baixo/competitivo/alto, aplicados em todas as calculadoras.</p>
+  </div>
+</div>
+
+<div id="config-panel" style="display:none;padding:14px 16px;border-bottom:0.5px solid var(--border);background:var(--surface-1);">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+    <button type="button" onclick="voltarMenu()" style="border:none;background:transparent;padding:2px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i></button>
+    <p style="font-size:13px;font-weight:500;">Ajuste de preços sugeridos</p>
+  </div>
+  <div style="display:flex;align-items:flex-start;gap:6px;background:var(--bg-accent);border-radius:var(--radius);padding:8px 10px;margin-bottom:12px;">
+    <i class="ti ti-info-circle" style="font-size:14px;color:var(--text-accent);flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+    <p style="font-size:12px;color:var(--text-accent);">Esses ajustes somam ou subtraem do preço de referência da região para formar os preços <strong>baixo</strong>, <strong>competitivo</strong> e <strong>alto</strong> usados em todas as calculadoras. Use valores negativos para bater ou ficar abaixo do mercado, zero para igualar, ou positivos para ficar acima.</p>
+  </div>
+  <div style="margin-bottom:8px;">
+    <label style="font-size:12px;color:var(--text-secondary);">Ajuste de Preço (preço baixo)</label>
+    <input type="number" id="cfg-baixo" value="-0.10" step="0.01" style="margin-top:4px;" oninput="calc(); calcBonus(); salvarConfigStorage();" />
+  </div>
+  <div style="margin-bottom:8px;">
+    <label style="font-size:12px;color:var(--text-secondary);">Ajuste de Preço (preço competitivo)</label>
+    <input type="number" id="cfg-comp" value="-0.10" step="0.01" style="margin-top:4px;" oninput="calc(); calcBonus(); salvarConfigStorage();" />
+  </div>
+  <div>
+    <label style="font-size:12px;color:var(--text-secondary);">Ajuste de Preço (preço alto)</label>
+    <input type="number" id="cfg-alto" value="-0.10" step="0.01" style="margin-top:4px;" oninput="calc(); calcBonus(); salvarConfigStorage();" />
+  </div>
+</div>
+
+<div id="screen-login" style="padding:28px 22px;flex:1;display:none;">
+  <button type="button" onclick="show('buscar')" style="border:none;background:transparent;padding:2px;margin-bottom:20px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+
+  <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:22px;">
+    <div style="width:56px;height:56px;border-radius:16px;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+      <i class="ti ti-briefcase" style="font-size:26px;color:var(--text-accent);" aria-hidden="true"></i>
+    </div>
+    <p style="font-size:18px;font-weight:600;margin-bottom:6px;">Negocia AI</p>
+    <span style="display:inline-block;font-size:10px;font-weight:600;color:var(--text-warning);background:var(--bg-warning);padding:3px 8px;border-radius:999px;margin-bottom:8px;">RECURSO PREMIUM</span>
+    <p id="login-subtitulo" style="font-size:12px;color:var(--text-secondary);text-align:center;">Entre para desbloquear o Premium e sincronizar seus dados</p>
+  </div>
+
+  <div id="login-config-aviso" style="display:none;align-items:flex-start;gap:6px;background:var(--bg-warning);border-radius:var(--radius);padding:8px 10px;margin-bottom:14px;">
+    <i class="ti ti-alert-triangle" style="font-size:14px;color:var(--text-warning);flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+    <p style="font-size:11px;color:var(--text-warning);">Login ainda não configurado. Veja em <strong>negocia-ai-notas-tecnicas.md</strong> o passo a passo para ativar (leva ~10 min, gratuito).</p>
+  </div>
+
+  <div style="display:flex;background:var(--surface-1);border-radius:var(--radius);padding:3px;margin-bottom:18px;">
+    <button type="button" id="tab-entrar" onclick="setModoLogin('entrar')" style="flex:1;border:none;padding:8px;font-size:13px;font-weight:500;border-radius:6px;background:var(--surface-2);">Entrar</button>
+    <button type="button" id="tab-criar" onclick="setModoLogin('criar')" style="flex:1;border:none;padding:8px;font-size:13px;font-weight:500;border-radius:6px;background:transparent;">Criar conta</button>
+  </div>
+
+  <p id="login-status" style="display:none;font-size:12px;margin-bottom:12px;"></p>
+
+  <div id="campo-nome" style="display:none;margin-bottom:10px;">
+    <label style="font-size:12px;color:var(--text-secondary);">Nome completo</label>
+    <input type="text" id="login-nome" placeholder="Seu nome" style="margin-top:4px;" />
+  </div>
+
+  <div style="margin-bottom:10px;">
+    <label style="font-size:12px;color:var(--text-secondary);">E-mail</label>
+    <input type="email" id="login-email" placeholder="seuemail@exemplo.com" style="margin-top:4px;" />
+  </div>
+
+  <div style="margin-bottom:6px;">
+    <label style="font-size:12px;color:var(--text-secondary);">Senha</label>
+    <input type="password" id="login-senha" placeholder="••••••••" style="margin-top:4px;" />
+  </div>
+
+  <div id="campo-confirmar-senha" style="display:none;margin-bottom:10px;">
+    <label style="font-size:12px;color:var(--text-secondary);">Confirmar senha</label>
+    <input type="password" id="login-confirmar-senha" placeholder="••••••••" style="margin-top:4px;" />
+  </div>
+
+  <div id="esqueci-senha" style="text-align:right;margin-bottom:16px;">
+    <button type="button" onclick="esqueciSenha()" style="border:none;background:transparent;padding:0;font-size:12px;color:var(--text-accent);">Esqueci minha senha</button>
+  </div>
+
+  <button type="button" id="btn-login-principal" onclick="fazerLogin()" style="width:100%;padding:11px;font-size:14px;font-weight:500;background:var(--bg-accent);color:var(--text-accent);border:none;border-radius:var(--radius);margin-bottom:18px;">Entrar</button>
+
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+    <div style="flex:1;height:0.5px;background:var(--border);"></div>
+    <span style="font-size:11px;color:var(--text-muted);">ou continue com</span>
+    <div style="flex:1;height:0.5px;background:var(--border);"></div>
+  </div>
+
+  <button type="button" onclick="fazerLoginGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;font-size:13px;margin-bottom:22px;">
+    <i class="ti ti-brand-google" style="font-size:16px;" aria-hidden="true"></i>Continuar com Google
+  </button>
+
+  <p id="login-footer" style="text-align:center;font-size:12px;color:var(--text-secondary);">Ainda não tem conta? <button type="button" onclick="setModoLogin('criar')" style="border:none;background:transparent;padding:0;font-size:12px;color:var(--text-accent);font-weight:500;">Criar conta</button></p>
+</div>
+
+<div id="screen-buscar" style="padding:16px;flex:1;">
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Como você quer buscar o produto?</p>
+  <div style="display:flex;gap:6px;margin-bottom:8px;">
+    <input type="text" id="busca-texto" placeholder="Digite o nome ou marca" onkeydown="if(event.key==='Enter'){buscarProdutosPorTexto(this.value);}" />
+    <button type="button" onclick="buscarProdutosPorTexto(document.getElementById('busca-texto').value)" style="flex-shrink:0;padding:9px 12px;" aria-label="Buscar"><i class="ti ti-search" style="font-size:16px;" aria-hidden="true"></i></button>
+  </div>
+  <p id="busca-status" style="display:none;font-size:12px;margin-bottom:10px;"></p>
+  <div id="busca-resultados" style="display:none;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px;">
+    <button type="button" onclick="abrirScannerCodigoBarras()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;"><i class="ti ti-barcode" style="font-size:22px;color:var(--text-accent);" aria-hidden="true"></i>Código de barras</button>
+    <button type="button" onclick="document.getElementById('foto-input').click()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;"><i class="ti ti-camera" style="font-size:22px;color:var(--text-accent);" aria-hidden="true"></i>Foto do produto</button>
+    <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="lidarComFotoInput(event)" />
+    <button type="button" onclick="iniciarBuscaPorVoz()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;"><i class="ti ti-microphone" style="font-size:22px;color:var(--text-accent);" aria-hidden="true"></i>Buscar por voz</button>
+    <button type="button" onclick="document.getElementById('busca-texto').focus()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;"><i class="ti ti-keyboard" style="font-size:22px;color:var(--text-accent);" aria-hidden="true"></i>Digitar descrição</button>
+  </div>
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Buscas recentes</p>
+  <div id="busca-recentes-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
+</div>
+
+<div id="screen-produto" style="padding:16px;flex:1;display:none;">
+  <div id="produto-foto-wrap" style="width:100%;height:110px;background:var(--surface-1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;overflow:hidden;"><i class="ti ti-photo" style="font-size:32px;color:var(--text-muted);" aria-hidden="true"></i></div>
+  <p id="produto-nome" style="font-weight:500;font-size:17px;margin-bottom:2px;"></p>
+  <p id="produto-marca" style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;"></p>
+  <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+    <div style="display:flex;justify-content:space-between;border-bottom:0.5px solid var(--border);padding-bottom:6px;"><span style="color:var(--text-secondary);">Código de barras</span><span id="produto-codigo"></span></div>
+    <div style="display:flex;justify-content:space-between;border-bottom:0.5px solid var(--border);padding-bottom:6px;"><span style="color:var(--text-secondary);">Embalagem</span><span id="produto-embalagem"></span></div>
+  </div>
+  <div style="background:var(--bg-accent);border-radius:var(--radius);padding:10px 12px;margin-top:14px;">
+    <p style="font-size:12px;color:var(--text-accent);margin-bottom:4px;">Argumento de venda</p>
+    <p id="produto-argumento" style="font-size:13px;"></p>
+  </div>
+</div>
+
+<div id="screen-precos" style="padding:16px;flex:1;display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface-1);border-radius:var(--radius);padding:8px 10px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <i class="ti ti-package" style="font-size:16px;color:var(--text-secondary);flex-shrink:0;" aria-hidden="true"></i>
+      <div style="min-width:0;">
+        <p style="font-size:10px;color:var(--text-secondary);">Produto selecionado</p>
+        <p id="contexto-produto-precos" style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
+      </div>
+    </div>
+    <button type="button" onclick="show('buscar')" style="font-size:11px;padding:4px 8px;flex-shrink:0;">Trocar</button>
+  </div>
+  <div style="display:flex;align-items:flex-start;gap:6px;background:var(--bg-accent);border-radius:var(--radius);padding:8px 10px;margin-bottom:14px;">
+    <i class="ti ti-info-circle" style="font-size:14px;color:var(--text-accent);flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+    <p style="font-size:12px;color:var(--text-accent);">Os valores abaixo são o <strong>preço de venda ao consumidor</strong> praticado pelos estabelecimentos próximos — não é o seu custo.</p>
+  </div>
+  <div style="border:1px solid var(--border-accent);border-radius:12px;padding:12px;margin-bottom:16px;background:var(--bg-accent);">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+      <i class="ti ti-sparkles" style="font-size:16px;color:var(--text-accent);" aria-hidden="true"></i>
+      <span style="font-size:13px;font-weight:600;color:var(--text-accent);">Busca de preços com IA</span>
+    </div>
+    <p style="font-size:11px;color:var(--text-accent);margin-bottom:10px;">Encontra os estabelecimentos com site perto de você e verifica direto neles o preço do produto selecionado — sem você precisar abrir cada site manualmente.</p>
+    <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;">
+      <div style="flex:1;">
+        <label style="font-size:11px;color:var(--text-accent);">Raio (km)</label>
+        <input type="number" id="raio-km-ia" value="2" min="0.5" max="20" step="0.5" style="margin-top:2px;" />
+      </div>
+      <button type="button" onclick="buscarPrecosComIA()" style="flex-shrink:0;padding:9px 14px;font-size:13px;background:var(--text-accent);color:#fff;border:none;">Pesquisar</button>
+    </div>
+    <p id="precos-ia-status" style="display:none;font-size:12px;margin-bottom:8px;"></p>
+    <div id="precos-ia-resultados" style="display:none;flex-direction:column;gap:8px;"></div>
+  </div>
+
+  <p style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Exemplo de referência (dados ilustrativos)</p>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px;">
+    <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px;text-align:center;"><p style="font-size:11px;color:var(--text-secondary);margin-bottom:2px;">Menor</p><p style="font-size:15px;font-weight:500;">R$ 8,49</p></div>
+    <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px;text-align:center;"><p style="font-size:11px;color:var(--text-secondary);margin-bottom:2px;">Média</p><p style="font-size:15px;font-weight:500;">R$ 9,20</p></div>
+    <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px;text-align:center;"><p style="font-size:11px;color:var(--text-secondary);margin-bottom:2px;">Maior</p><p style="font-size:15px;font-weight:500;">R$ 10,10</p></div>
+  </div>
+
+  <div style="border-top:0.5px solid var(--border);margin:16px 0;padding-top:14px;">
+    <p style="font-size:13px;font-weight:500;margin-bottom:4px;">Estabelecimentos próximos de você</p>
+    <p style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">Usa sua localização real. Não lemos o preço exato de cada site automaticamente — mas geramos uma busca pronta pra você conferir com 1 toque.</p>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+      <div style="flex:1;">
+        <label style="font-size:11px;color:var(--text-secondary);">Raio de busca (km)</label>
+        <input type="number" id="raio-km" value="3" min="0.5" max="20" step="0.5" style="margin-top:2px;" />
+      </div>
+      <button type="button" onclick="buscarEstabelecimentosProximos()" style="flex-shrink:0;padding:9px 14px;font-size:13px;align-self:flex-end;">Buscar</button>
+    </div>
+    <p id="regiao-status" style="display:none;font-size:12px;margin-bottom:10px;"></p>
+    <div id="regiao-resultados" style="display:none;flex-direction:column;gap:8px;"></div>
+  </div>
+
+  <div style="border-top:0.5px solid var(--border);margin-top:16px;padding-top:14px;">
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Preço de venda por estabelecimento (exemplo)</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:14px;font-weight:500;">Mercado Bom Preço</span><span style="font-size:14px;">R$ 8,49</span></div>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Rua das Flores, 120 · 380 m</p>
+      </div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:14px;font-weight:500;">Super Vitória</span><span style="font-size:14px;">R$ 9,30</span></div>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Av. Central, 45 · 900 m</p>
+      </div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:14px;font-weight:500;">Mercearia Silva</span><span style="font-size:14px;">R$ 10,10</span></div>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Rua 7 de Setembro, 88 · 1.4 km</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-calculadoras" style="padding:16px;flex:1;display:none;">
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Escolha a calculadora que quer usar</p>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <button type="button" onclick="show('preco')" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px;text-align:left;">
+      <div style="width:40px;height:40px;border-radius:10px;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-calculator" style="font-size:20px;color:var(--text-accent);" aria-hidden="true"></i></div>
+      <div style="flex:1;">
+        <p style="font-size:14px;font-weight:500;">Preço</p>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Preços sugeridos por faixa (baixo/competitivo/alto)</p>
+      </div>
+      <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-muted);flex-shrink:0;" aria-hidden="true"></i>
+    </button>
+    <button type="button" onclick="show('bonus')" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px;text-align:left;">
+      <div style="width:40px;height:40px;border-radius:10px;background:var(--bg-warning);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-gift" style="font-size:20px;color:var(--text-warning);" aria-hidden="true"></i></div>
+      <div style="flex:1;">
+        <p style="font-size:14px;font-weight:500;">Bonificação</p>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Promoções, custo efetivo e bonificação necessária</p>
+      </div>
+      <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-muted);flex-shrink:0;" aria-hidden="true"></i>
+    </button>
+    <button type="button" onclick="show('simulador')" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px;text-align:left;">
+      <div style="width:40px;height:40px;border-radius:10px;background:var(--bg-success);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-percentage" style="font-size:20px;color:var(--text-success);" aria-hidden="true"></i></div>
+      <div style="flex:1;">
+        <p style="font-size:14px;font-weight:500;">Margem/Mark Up</p>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Simulador detalhado com ICMS e Pis/Cofins</p>
+      </div>
+      <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-muted);flex-shrink:0;" aria-hidden="true"></i>
+    </button>
+    <button type="button" onclick="show('sellout')" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px;text-align:left;">
+      <div style="width:40px;height:40px;border-radius:10px;background:var(--bg-danger);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-discount-2" style="font-size:20px;color:var(--text-danger);" aria-hidden="true"></i></div>
+      <div style="flex:1;">
+        <p style="font-size:14px;font-weight:500;">Sell Out</p>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Investimento necessário para bater margem objetivo</p>
+      </div>
+      <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-muted);flex-shrink:0;" aria-hidden="true"></i>
+    </button>
+  </div>
+</div>
+
+<div id="screen-preco" style="padding:16px;flex:1;display:none;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+    <button type="button" onclick="show('calculadoras')" style="border:none;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+    <span style="font-weight:500;font-size:15px;">Preço</span>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface-1);border-radius:var(--radius);padding:8px 10px;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <i class="ti ti-package" style="font-size:16px;color:var(--text-secondary);flex-shrink:0;" aria-hidden="true"></i>
+      <div style="min-width:0;">
+        <p style="font-size:10px;color:var(--text-secondary);">Produto selecionado</p>
+        <p id="contexto-produto-preco" style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
+      </div>
+    </div>
+    <button type="button" onclick="show('buscar')" style="font-size:11px;padding:4px 8px;flex-shrink:0;">Trocar</button>
+  </div>
+  <label style="font-size:13px;color:var(--text-secondary);">Preço de custo</label>
+  <input type="number" id="custo" value="6.50" step="0.01" style="margin:4px 0 14px;" oninput="calc()" />
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+    <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+      <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">Preço baixo</span><span id="p-baixo" style="font-size:15px;font-weight:500;"></span></div>
+      <p id="m-baixo" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></p>
+    </div>
+    <div style="border:2px solid var(--border-accent);border-radius:var(--radius);padding:10px 12px;">
+      <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">Preço competitivo</span><span id="p-comp" style="font-size:15px;font-weight:500;"></span></div>
+      <p id="m-comp" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></p>
+    </div>
+    <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+      <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">Preço alto</span><span id="p-alto" style="font-size:15px;font-weight:500;"></span></div>
+      <p id="m-alto" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></p>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Preço de venda determinado pelo cliente</p>
+  <input type="number" id="precoCliente" value="9.00" step="0.01" style="margin-bottom:8px;" oninput="calc()" />
+  <div style="border:0.5px solid var(--border-strong);border-radius:var(--radius);padding:10px 12px;">
+    <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">Preço do cliente</span><span id="p-cliente" style="font-size:15px;font-weight:500;"></span></div>
+    <p id="m-cliente" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></p>
+  </div>
+</div>
+
+<div id="screen-bonus" style="padding:16px;flex:1;display:none;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+    <button type="button" onclick="show('calculadoras')" style="border:none;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+    <span style="font-weight:500;font-size:15px;">Bonificação</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px;">
+    <div><label style="font-size:12px;color:var(--text-secondary);">Custo/un.</label><input type="number" id="bcusto" value="6.50" step="0.01" oninput="calcBonus()" /></div>
+    <div><label style="font-size:12px;color:var(--text-secondary);">Un. por caixa</label><input type="number" id="bunid" value="12" step="1" oninput="calcBonus()" /></div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <label style="font-size:12px;color:var(--text-secondary);">Caixas do pedido</label>
+    <input type="number" id="bcaixas" value="10" step="1" oninput="calcBonus()" />
+  </div>
+
+  <p style="font-size:12px;color:var(--text-secondary);margin:6px 0 4px;">Promoção comercial (opcional)</p>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;margin-bottom:8px;">
+    <input type="number" id="bcompre" value="10" step="1" placeholder="Compre" oninput="calcBonus()" />
+    <span style="font-size:12px;color:var(--text-secondary);text-align:center;">caixas, ganhe</span>
+    <input type="number" id="bganhe" value="2" step="1" placeholder="Ganhe" oninput="calcBonus()" />
+  </div>
+  <label style="font-size:12px;color:var(--text-secondary);">Investimento liberado (%)</label>
+  <input type="number" id="binvestpct" value="0" step="0.1" placeholder="Ex: 5" style="margin-top:2px;" oninput="calcBonus()" />
+  <p style="font-size:11px;color:var(--text-muted);margin:6px 0 14px;">Use só a promoção em caixas, só o percentual, ou os dois somados.</p>
+
+  <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px 12px;margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);"><span>Custo efetivo/un.</span><span id="b-custoun"></span></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-top:4px;"><span>Custo efetivo/caixa</span><span id="b-custocx"></span></div>
+  </div>
+
+  <button type="button" onclick="toggleSecaoProdutoBonus()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface-1);border-radius:var(--radius);margin-bottom:8px;">
+    <span style="font-size:13px;font-weight:500;">Produto selecionado</span>
+    <i id="icon-secao-produto-bonus" class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+  </button>
+  <div id="secao-produto-bonus" style="display:none;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface-1);border-radius:var(--radius);padding:8px 10px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+        <i class="ti ti-package" style="font-size:16px;color:var(--text-secondary);flex-shrink:0;" aria-hidden="true"></i>
+        <div style="min-width:0;">
+          <p style="font-size:10px;color:var(--text-secondary);">Produto</p>
+          <p id="contexto-produto-bonus" style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
+        </div>
+      </div>
+      <button type="button" onclick="show('buscar')" style="font-size:11px;padding:4px 8px;flex-shrink:0;">Trocar</button>
+    </div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Preços sugeridos com base no custo efetivo</p>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;">Preço baixo</span><span id="b-p-baixo" style="font-size:13px;font-weight:500;"></span></div>
+        <p id="b-m-baixo" style="font-size:11px;color:var(--text-secondary);margin-top:2px;"></p>
+      </div>
+      <div style="border:2px solid var(--border-accent);border-radius:var(--radius);padding:8px 10px;">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;">Preço competitivo</span><span id="b-p-comp" style="font-size:13px;font-weight:500;"></span></div>
+        <p id="b-m-comp" style="font-size:11px;color:var(--text-secondary);margin-top:2px;"></p>
+      </div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;">Preço alto</span><span id="b-p-alto" style="font-size:13px;font-weight:500;"></span></div>
+        <p id="b-m-alto" style="font-size:11px;color:var(--text-secondary);margin-top:2px;"></p>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text-muted);">Acima: efeito da promoção no seu custo. Abaixo: quanto bonificar para chegar no custo que você quer praticar.</p>
+  </div>
+
+  <button type="button" onclick="toggleSecaoCustoPraticar()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface-1);border-radius:var(--radius);margin-bottom:8px;">
+    <span style="font-size:13px;font-weight:500;">Custo a praticar</span>
+    <i id="icon-secao-custopraticar" class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+  </button>
+  <div id="secao-custopraticar" style="display:none;">
+    <div style="margin-bottom:10px;">
+      <label style="font-size:12px;color:var(--text-secondary);">Custo a praticar</label>
+      <input type="number" id="bprecocli" value="5.20" step="0.01" oninput="calcBonus()" />
+    </div>
+    <div style="border:2px solid var(--border-accent);border-radius:var(--radius);padding:10px 12px;">
+      <p style="font-size:12px;color:var(--text-accent);margin-bottom:6px;">Bonificação necessária</p>
+      <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Por unidade</span><span id="b-bunit" style="font-weight:500;"></span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:2px;"><span>Valor total</span><span id="b-btotal" style="font-weight:500;"></span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:2px;"><span>Equivalente em caixas</span><span id="b-bcx" style="font-weight:500;"></span></div>
+      <div style="border-top:0.5px solid var(--border);margin-top:8px;padding-top:8px;">
+        <p style="font-size:12px;color:var(--text-secondary);">Sugestão prática</p>
+        <p id="b-sugestao" style="font-size:15px;font-weight:500;margin-top:2px;"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-simulador" style="padding:16px;flex:1;display:none;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+    <button type="button" onclick="show('calculadoras')" style="border:none;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+    <span style="font-weight:500;font-size:15px;">Margem/Mark Up</span>
+  </div>
+  <label style="font-size:12px;color:var(--text-secondary);">Custo do produto</label>
+  <input type="number" id="sim-custo" value="1.00" step="0.01" style="margin:4px 0 12px;background:var(--bg-warning);" oninput="calcSimulador()" />
+
+  <div style="border-radius:12px;border:0.5px solid var(--border);overflow:hidden;margin-bottom:10px;">
+    <div style="background:var(--bg-warning);color:var(--text-warning);font-size:12px;font-weight:500;padding:6px 10px;">Resumo</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;">
+      <span>Saldo impostos</span><span id="sim-saldo" style="font-weight:500;"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);">
+      <span>Lucro zero</span><span id="sim-lucrozero" style="font-weight:500;"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);">
+      <span>Preço de venda</span>
+      <input type="number" id="sim-preco" value="2.00" step="0.01" style="width:90px;background:var(--bg-warning);text-align:right;" oninput="calcSimulador()" />
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);background:var(--bg-accent);">
+      <span style="color:var(--text-accent);font-weight:500;">Margem de contribuição</span><span id="sim-margem" style="font-weight:500;color:var(--text-accent);"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);">
+      <span>Markup bruto</span><span id="sim-markup" style="font-weight:500;"></span>
+    </div>
+  </div>
+
+  <div style="border-radius:12px;border:0.5px solid var(--border);overflow:hidden;margin-bottom:10px;">
+    <div style="background:var(--bg-accent);color:var(--text-accent);font-size:12px;font-weight:500;padding:6px 10px;">Entrada</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;">
+      <span>ICMS Entrada</span>
+      <span style="display:flex;gap:12px;"><span style="color:var(--text-secondary);">12,00%</span><span id="sim-icmse-valor" style="font-weight:500;min-width:48px;text-align:right;"></span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);">
+      <span>Pis/Cofins</span>
+      <span style="display:flex;gap:12px;"><span style="color:var(--text-secondary);">9,25%</span><span id="sim-pce-valor" style="font-weight:500;min-width:48px;text-align:right;"></span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);background:var(--surface-1);">
+      <span style="font-weight:500;">Total impostos</span>
+      <span id="sim-totalentrada" style="font-weight:500;"></span>
+    </div>
+  </div>
+
+  <div style="border-radius:12px;border:0.5px solid var(--border);overflow:hidden;">
+    <div style="background:var(--bg-success);color:var(--text-success);font-size:12px;font-weight:500;padding:6px 10px;">Saída</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;">
+      <span>ICMS ST</span>
+      <span style="display:flex;gap:12px;"><span style="color:var(--text-secondary);">17,00%</span><span id="sim-icmss-valor" style="font-weight:500;min-width:48px;text-align:right;"></span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);">
+      <span>Pis/Cofins</span>
+      <span style="display:flex;gap:12px;"><span style="color:var(--text-secondary);">9,25%</span><span id="sim-pcs-valor" style="font-weight:500;min-width:48px;text-align:right;"></span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);background:var(--surface-1);">
+      <span style="font-weight:500;">Total impostos</span>
+      <span id="sim-totalsaida" style="font-weight:500;"></span>
+    </div>
+  </div>
+</div>
+
+<div id="screen-sellout" style="padding:16px;flex:1;display:none;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+    <button type="button" onclick="show('calculadoras')" style="border:none;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+    <span style="font-weight:500;font-size:15px;">Sell Out</span>
+  </div>
+  <label style="font-size:12px;color:var(--text-secondary);">Custo do produto</label>
+  <input type="number" id="so-custo" value="9.00" step="0.01" style="margin:4px 0 12px;background:var(--bg-warning);" oninput="calcSellOut()" />
+
+  <div style="border-radius:12px 12px 0 0;background:var(--text-primary);color:var(--surface-2);text-align:center;font-size:12px;font-weight:600;padding:7px;">Cálculo Sell Out</div>
+  <div style="border:0.5px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:10px 12px;margin-bottom:10px;">
+    <label style="font-size:12px;color:var(--text-secondary);">Preço promocional</label>
+    <input type="number" id="so-preco" value="15.00" step="0.01" style="margin:4px 0 10px;background:var(--bg-warning);" oninput="calcSellOut()" />
+    <label style="font-size:12px;color:var(--text-secondary);">Margem objetivo na ação (%)</label>
+    <input type="number" id="so-margemobj" value="31" step="0.1" style="margin-top:4px;background:var(--bg-warning);" oninput="calcSellOut()" />
+  </div>
+
+  <div style="background:var(--bg-danger);border-radius:var(--radius);padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:12px;color:var(--text-danger);font-weight:500;">Investimento sell out/unid.</span>
+    <span id="so-investimento" style="font-size:15px;font-weight:600;color:var(--text-danger);"></span>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface-1);border-radius:var(--radius);margin-bottom:10px;font-size:12px;">
+    <span>Custo atualizado com sell out</span><span id="so-custoatualizado" style="font-weight:500;"></span>
+  </div>
+
+  <div style="border-radius:12px;border:0.5px solid var(--border);overflow:hidden;margin-bottom:10px;">
+    <div style="background:var(--bg-accent);color:var(--text-accent);font-size:12px;font-weight:500;padding:6px 10px;">Entrada</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;">
+      <span>ICMS Entrada</span>
+      <span style="display:flex;gap:12px;"><span style="color:var(--text-secondary);">12,00%</span><span id="so-icmse-valor" style="font-weight:500;min-width:48px;text-align:right;"></span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);">
+      <span>Pis/Cofins</span>
+      <span style="display:flex;gap:12px;"><span style="color:var(--text-secondary);">9,25%</span><span id="so-pce-valor" style="font-weight:500;min-width:48px;text-align:right;"></span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);background:var(--surface-1);">
+      <span style="font-weight:500;">Total impostos</span>
+      <span id="so-totalentrada" style="font-weight:500;"></span>
+    </div>
+  </div>
+
+  <div style="border-radius:12px;border:0.5px solid var(--border);overflow:hidden;margin-bottom:10px;">
+    <div style="background:var(--bg-success);color:var(--text-success);font-size:12px;font-weight:500;padding:6px 10px;">Saída</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;">
+      <span>ICMS ST</span>
+      <span style="display:flex;gap:12px;"><span style="color:var(--text-secondary);">17,00%</span><span id="so-icmss-valor" style="font-weight:500;min-width:48px;text-align:right;"></span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);">
+      <span>Pis/Cofins</span>
+      <span style="display:flex;gap:12px;"><span style="color:var(--text-secondary);">9,25%</span><span id="so-pcs-valor" style="font-weight:500;min-width:48px;text-align:right;"></span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);background:var(--surface-1);">
+      <span style="font-weight:500;">Total impostos</span>
+      <span id="so-totalsaida" style="font-weight:500;"></span>
+    </div>
+  </div>
+
+  <div style="border-radius:12px;border:0.5px solid var(--border);overflow:hidden;">
+    <div style="background:var(--bg-warning);color:var(--text-warning);font-size:12px;font-weight:500;padding:6px 10px;">Resumo</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;">
+      <span>Saldo impostos</span><span id="so-saldo" style="font-weight:500;"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);">
+      <span>Lucro zero</span><span id="so-lucrozero" style="font-weight:500;"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-top:0.5px solid var(--border);background:var(--bg-success);">
+      <span style="color:var(--text-success);font-weight:500;">Margem contrib. final</span><span id="so-margemfinal" style="font-weight:500;color:var(--text-success);"></span>
+    </div>
+  </div>
+</div>
+
+<div id="screen-notas" style="padding:16px;flex:1;display:none;">
+  <div id="notas-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <span style="font-weight:500;font-size:15px;">Minhas notas</span>
+    <button type="button" onclick="abrirNovaNota()" style="padding:6px 10px;font-size:12px;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>Nova</button>
+  </div>
+
+  <div id="nota-form" style="display:none;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;">
+    <p id="nota-form-titulo" style="font-weight:500;font-size:13px;margin-bottom:8px;">Nova nota</p>
+    <label style="font-size:12px;color:var(--text-secondary);">Título da nota</label>
+    <input type="text" id="nota-titulo" placeholder="Ex: Troca de produto" style="margin-bottom:8px;" />
+    <label style="font-size:12px;color:var(--text-secondary);">Cliente</label>
+    <input type="text" id="nota-cliente" placeholder="Ex: Mercado Bom Preço · #0231" style="margin-bottom:8px;" />
+    <label style="font-size:12px;color:var(--text-secondary);">Anotação</label>
+    <textarea id="nota-texto" rows="3" placeholder="Ex: Trocar 2 unidades de bolacha recheada na próxima visita" style="margin-bottom:8px;"></textarea>
+    <label style="font-size:12px;color:var(--text-secondary);">Situação</label>
+    <select id="nota-status" style="margin-bottom:10px;">
+      <option value="pendente">Pendente</option>
+      <option value="concluida">Concluída</option>
+    </select>
+
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
+      <input type="checkbox" id="nota-lembrete-ativo" onchange="toggleLembreteCampos()" style="width:auto;" />Criar lembrete para esta nota
+    </label>
+    <div id="lembrete-campos" style="display:none;margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div><label style="font-size:11px;color:var(--text-secondary);">Data</label><input type="date" id="nota-lembrete-data" /></div>
+        <div><label style="font-size:11px;color:var(--text-secondary);">Hora</label><input type="time" id="nota-lembrete-hora" value="09:00" /></div>
+      </div>
+      <label style="font-size:11px;color:var(--text-secondary);">E-mail para convite do evento (opcional)</label>
+      <input type="email" id="nota-lembrete-email" placeholder="seuemail@gmail.com" style="margin-top:2px;" />
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;">
+        <p style="font-size:11px;color:var(--text-muted);">Ao salvar, criamos o evento no seu Google Agenda.</p>
+        <button type="button" onclick="conectarGoogleAgenda()" style="font-size:11px;padding:4px 8px;flex-shrink:0;">Conectar Google Agenda</button>
+      </div>
+      <p id="google-agenda-status-form" style="display:none;font-size:11px;margin-top:4px;"></p>
+    </div>
+
+    <label style="font-size:12px;color:var(--text-secondary);">Anexar imagens ou arquivos (opcional)</label>
+    <input type="file" id="nota-anexos" multiple style="margin-top:2px;margin-bottom:6px;" onchange="mostrarAnexos()" />
+    <div id="anexos-lista" style="display:flex;flex-direction:column;gap:2px;margin-bottom:8px;"></div>
+
+    <div style="display:flex;gap:8px;">
+      <button type="button" onclick="salvarNota()" style="flex:1;">Salvar</button>
+      <button type="button" onclick="cancelarForm()" style="flex:1;">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="notas-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+  <div id="nota-detalhe" style="display:none;border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <button type="button" onclick="fecharDetalhe()" style="font-size:12px;padding:4px 8px;"><i class="ti ti-arrow-left" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>Voltar</button>
+      <button type="button" onclick="editarNota()" style="font-size:12px;padding:4px 8px;"><i class="ti ti-pencil" style="font-size:13px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>Editar</button>
+    </div>
+    <p id="detalhe-titulo" style="font-weight:500;font-size:15px;margin-bottom:2px;"></p>
+    <p id="detalhe-cliente" style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;"></p>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span id="detalhe-status-badge" style="font-size:11px;padding:3px 8px;border-radius:var(--radius);"></span>
+      <button type="button" onclick="alternarStatus()" id="detalhe-status-btn" style="font-size:11px;padding:4px 8px;"></button>
+    </div>
+    <div id="detalhe-lembrete" style="display:none;background:var(--bg-accent);border-radius:var(--radius);padding:8px 10px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <i class="ti ti-bell" style="font-size:14px;color:var(--text-accent);" aria-hidden="true"></i>
+        <span id="detalhe-lembrete-data" style="font-size:12px;color:var(--text-accent);font-weight:500;"></span>
+      </div>
+      <p id="detalhe-lembrete-sync" style="font-size:11px;color:var(--text-accent);margin-top:4px;"></p>
+      <button type="button" id="detalhe-lembrete-sync-btn" onclick="sincronizarLembreteAgora()" style="display:none;font-size:11px;padding:4px 8px;margin-top:6px;">Sincronizar com Google Agenda</button>
+    </div>
+    <div id="detalhe-anexos" style="display:none;margin-bottom:10px;">
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Anexos</p>
+      <div id="detalhe-anexos-lista" style="display:flex;flex-direction:column;gap:4px;"></div>
+    </div>
+    <p id="detalhe-texto" style="font-size:14px;white-space:pre-wrap;"></p>
+  </div>
+</div>
+
+<div style="flex:1"></div>
+<div class="bottom-nav">
+  <button type="button" onclick="show('buscar')" id="nav-buscar" class="nav-btn"><i class="ti ti-search" style="font-size:21px;" aria-hidden="true"></i>Buscar</button>
+  <button type="button" onclick="show('produto')" id="nav-produto" class="nav-btn"><i class="ti ti-package" style="font-size:21px;" aria-hidden="true"></i>Produto</button>
+  <button type="button" onclick="show('precos')" id="nav-precos" class="nav-btn"><i class="ti ti-map-pin" style="font-size:21px;" aria-hidden="true"></i>Região</button>
+  <button type="button" onclick="show('calculadoras')" id="nav-calculadoras" class="nav-btn"><i class="ti ti-calculator" style="font-size:21px;" aria-hidden="true"></i>Calc.</button>
+  <button type="button" onclick="show('notas')" id="nav-notas" class="nav-btn"><i class="ti ti-notes" style="font-size:21px;" aria-hidden="true"></i>Notas</button>
+</div>
+
+</div>
+
+<div id="scanner-overlay" style="display:none;position:fixed;inset:0;background:#000;z-index:50;flex-direction:column;">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;">
+    <span style="color:#fff;font-size:14px;font-weight:500;">Aponte para o código de barras</span>
+    <button type="button" onclick="fecharScanner()" style="border:none;background:transparent;padding:4px;" aria-label="Fechar câmera"><i class="ti ti-x" style="font-size:20px;color:#fff;" aria-hidden="true"></i></button>
+  </div>
+  <div id="scanner-reader" style="flex:1;"></div>
+</div>
+<div id="foto-reader-temp" style="display:none;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+/* ======================================================================
+   CONFIGURAÇÃO DO LOGIN (Firebase Authentication)
+   Para ativar o login de verdade:
+   1. Crie um projeto gratuito em https://console.firebase.google.com
+   2. No projeto, vá em "Compilação" → "Authentication" → "Sign-in method"
+      e ative "E-mail/senha" e "Google".
+   3. Vá em "Configurações do projeto" (ícone de engrenagem) → role até
+      "Seus apps" → clique no ícone "</>" para criar um app da Web.
+   4. Copie os valores gerados (apiKey, authDomain, etc.) e cole abaixo,
+      substituindo os textos "COLE_AQUI...".
+   ====================================================================== */
+var firebaseConfig = {
+  apiKey: "AIzaSyDupnB06vfytNsDp5Mpv10ROqSEXQEPz40",
+  authDomain: "negocia-ai-55559.firebaseapp.com",
+  projectId: "negocia-ai-55559",
+  storageBucket: "negocia-ai-55559.firebasestorage.app",
+  messagingSenderId: "319258835439",
+  appId: "1:319258835439:web:4bf7302a286b7732ad5e1a"
+};
+var FIREBASE_CONFIGURADO = firebaseConfig.apiKey.indexOf('COLE_AQUI') === -1;
+if (FIREBASE_CONFIGURADO) {
+  firebase.initializeApp(firebaseConfig);
+}
+var USUARIO_ATUAL = null;
+
+/* ======================================================================
+   CONFIGURAÇÃO DO GOOGLE AGENDA (Calendar API)
+   Para ativar a sincronização real dos lembretes:
+   1. Acesse https://console.cloud.google.com e selecione o MESMO projeto
+      do Firebase (ex: "negocia-ai-55559") no seletor do topo.
+   2. Vá em "APIs e serviços" → "Biblioteca", procure "Google Calendar API"
+      e clique em "Ativar".
+   3. Vá em "APIs e serviços" → "Tela de permissão OAuth", escolha "Externo",
+      preencha nome do app e e-mail, e adicione seu e-mail em "Usuários de teste".
+   4. Vá em "APIs e serviços" → "Credenciais" → "Criar credenciais" →
+      "ID do cliente OAuth" → tipo "Aplicativo da Web". Em "Origens JavaScript
+      autorizadas" adicione o(s) endereço(s) de onde o app vai rodar
+      (ex: http://localhost e/ou o endereço do site quando hospedar).
+   5. Copie o "ID do cliente" gerado (termina em .apps.googleusercontent.com)
+      e cole abaixo, no lugar de COLE_AQUI.
+   ====================================================================== */
+var GOOGLE_CALENDAR_CLIENT_ID = "319258835439-dk6li8vbmd48mtija0mvapsb74bk9big.apps.googleusercontent.com";
+var GOOGLE_CALENDAR_CONFIGURADO = GOOGLE_CALENDAR_CLIENT_ID.indexOf('COLE_AQUI') === -1;
+var GOOGLE_TOKEN_CLIENT = null;
+var GOOGLE_ACCESS_TOKEN = null;
+var GOOGLE_TOKEN_EXPIRA = 0;
+var _resolverTokenPendente = null;
+
+/* ======================================================================
+   CONFIGURAÇÃO DA BUSCA DE PREÇOS COM IA (backend próprio + Claude API)
+   Para ativar:
+   1. Crie e implante (deploy) o Worker do arquivo
+      "cloudflare-worker-precos-ia.js" na Cloudflare (veja o passo a passo
+      em negocia-ai-notas-tecnicas.md).
+   2. Cole abaixo a URL do Worker (ex: https://seu-worker.SEUUSUARIO.workers.dev)
+      e a mesma "senha" (APP_SHARED_SECRET) que você configurou lá.
+   ====================================================================== */
+var PRECOS_IA_WORKER_URL = "https://negociar-ai-precos.jlmhaag123.workers.dev";
+var PRECOS_IA_CHAVE_APP = "120286Ma!";
+var PRECOS_IA_CONFIGURADO = PRECOS_IA_WORKER_URL.indexOf('COLE_AQUI') === -1;
+
+var REGIAO = { menor: 8.49, media: 9.20, maior: 10.10 };
+var TAX = { icmsEntrada: 0.12, pcEntrada: 0.0925, icmsSaida: 0.17, pcSaida: 0.0925 };
+var PRODUTOS = {
+  nescau: { nome:'Achocolatado Nescau 400g', marca:'Nestlé', categoria:'Achocolatados', embalagem:'Lata 400g', codigo:'7891000053508', argumento:'Marca líder de mercado, alto giro em padarias e mercearias — bom item de entrada para negociar volume.' },
+  omo: { nome:'Sabão em pó Omo 1,6kg', marca:'Unilever', categoria:'Limpeza', embalagem:'Caixa 1,6kg', codigo:'7891150015621', argumento:'Alto volume de compra por caixa — bom item para negociar bonificação em pedidos grandes de mercearias.' }
+};
+var PRODUTO_ATUAL = PRODUTOS.nescau;
+var USUARIO_LOGADO = false;
+var modoLogin = 'entrar';
+var NOTAS = [
+  {titulo:'Troca de produto', cliente:'Mercado Bom Preço · #0231', texto:'Trocar 2 unidades de bolacha recheada na próxima visita.', lembrete:null, anexos:[], status:'pendente'},
+  {titulo:'Cobrança boleto atrasado', cliente:'Mercearia Silva · #0345', texto:'Verificar se o cliente pagou o boleto atrasado antes da próxima visita.', lembrete:{data:'2026-08-21', hora:'09:00', email:'vendedor@gmail.com'}, anexos:['boleto_setembro.pdf'], status:'pendente'},
+  {titulo:'Negociação em aberto', cliente:'Super Vitória · #0198', texto:'Cliente pediu prazo de 30 dias, aguardando aprovação do financeiro.', lembrete:null, anexos:[], status:'concluida'}
+];
+
+/* ---- Persistência local (localStorage) ---- */
+try {
+  var _storedNotas = localStorage.getItem('negocia_notas');
+  if (_storedNotas) { NOTAS = JSON.parse(_storedNotas); }
+} catch (e) {}
+
+function salvarNotasStorage(){
+  try { localStorage.setItem('negocia_notas', JSON.stringify(NOTAS)); } catch (e) {}
+}
+function salvarConfigStorage(){
+  try {
+    var cfg = {
+      baixo: document.getElementById('cfg-baixo').value,
+      comp: document.getElementById('cfg-comp').value,
+      alto: document.getElementById('cfg-alto').value
+    };
+    localStorage.setItem('negocia_cfg', JSON.stringify(cfg));
+  } catch (e) {}
+}
+function carregarConfigStorage(){
+  try {
+    var raw = localStorage.getItem('negocia_cfg');
+    if (!raw) return;
+    var cfg = JSON.parse(raw);
+    if (cfg.baixo !== undefined) document.getElementById('cfg-baixo').value = cfg.baixo;
+    if (cfg.comp !== undefined) document.getElementById('cfg-comp').value = cfg.comp;
+    if (cfg.alto !== undefined) document.getElementById('cfg-alto').value = cfg.alto;
+  } catch (e) {}
+}
+
+var notaEditandoIndex = null;
+var notaAtualIndex = null;
+var formAnexos = [];
+var confirmandoExclusaoIndex = null;
+
+var TODAS_TELAS = ['login','buscar','produto','precos','calculadoras','preco','bonus','simulador','sellout','notas'];
+var NAV_MAP = { buscar:'nav-buscar', produto:'nav-produto', precos:'nav-precos', calculadoras:'nav-calculadoras', preco:'nav-calculadoras', bonus:'nav-calculadoras', simulador:'nav-calculadoras', sellout:'nav-calculadoras', notas:'nav-notas' };
+
+function selecionarProduto(key){
+  selecionarProdutoObjeto(PRODUTOS[key]);
+}
+function selecionarProdutoObjeto(produto){
+  PRODUTO_ATUAL = produto;
+  renderProduto();
+  salvarRecente(produto);
+  renderRecentes();
+  show('produto');
+}
+function renderProduto(){
+  document.getElementById('produto-nome').textContent = PRODUTO_ATUAL.nome;
+  document.getElementById('produto-marca').textContent = PRODUTO_ATUAL.marca + ' · ' + PRODUTO_ATUAL.categoria;
+  document.getElementById('produto-codigo').textContent = PRODUTO_ATUAL.codigo;
+  document.getElementById('produto-embalagem').textContent = PRODUTO_ATUAL.embalagem;
+  document.getElementById('produto-argumento').textContent = PRODUTO_ATUAL.argumento;
+
+  var fotoWrap = document.getElementById('produto-foto-wrap');
+  if (fotoWrap) {
+    if (PRODUTO_ATUAL.imagem) {
+      fotoWrap.innerHTML = '<img src="' + PRODUTO_ATUAL.imagem + '" alt="Foto do produto" style="max-width:100%;max-height:100%;object-fit:contain;" />';
+    } else {
+      fotoWrap.innerHTML = '<i class="ti ti-photo" style="font-size:32px;color:var(--text-muted);" aria-hidden="true"></i>';
+    }
+  }
+
+  var elPrecos = document.getElementById('contexto-produto-precos');
+  if (elPrecos) elPrecos.textContent = PRODUTO_ATUAL.nome;
+  var elPreco = document.getElementById('contexto-produto-preco');
+  if (elPreco) elPreco.textContent = PRODUTO_ATUAL.nome;
+  var elBonus = document.getElementById('contexto-produto-bonus');
+  if (elBonus) elBonus.textContent = PRODUTO_ATUAL.nome;
+}
+
+/* ---- Busca real de produtos (Open Food Facts / Open Products Facts) ---- */
+function mapearProdutoAPI(produtoJson, codigoConsultado){
+  var p = produtoJson || {};
+  var nome = p.product_name_pt || p.product_name || p.generic_name || ('Produto ' + (codigoConsultado || ''));
+  var marca = (p.brands || '').split(',')[0].trim() || 'Marca não informada';
+  var categoria = (p.categories || '').split(',')[0].trim() || '—';
+  var embalagem = p.quantity || '—';
+  var imagem = p.image_front_small_url || p.image_url || p.image_small_url || null;
+  return {
+    nome: nome,
+    marca: marca,
+    categoria: categoria,
+    embalagem: embalagem,
+    codigo: p.code || codigoConsultado || '—',
+    imagem: imagem,
+    argumento: 'Produto identificado via base pública (Open Food Facts). Confirme embalagem, validade e preço com o cliente antes de fechar a negociação.'
+  };
+}
+function mostrarStatusBusca(msg, erro){
+  var el = document.getElementById('busca-status');
+  if (!el) return;
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.style.color = erro ? 'var(--text-danger)' : 'var(--text-secondary)';
+}
+function esconderStatusBusca(){
+  var el = document.getElementById('busca-status');
+  if (el) el.style.display = 'none';
+}
+function esconderResultados(){
+  var el = document.getElementById('busca-resultados');
+  if (!el) return;
+  el.style.display = 'none';
+  el.innerHTML = '';
+}
+function mostrarResultados(lista){
+  var el = document.getElementById('busca-resultados');
+  if (!el) return;
+  el.innerHTML = '';
+  el.style.display = 'flex';
+  lista.forEach(function(p){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.style.cssText = 'display:flex;align-items:center;gap:10px;text-align:left;border:0.5px solid var(--border);padding:8px 10px;width:100%;';
+    var imgHtml = p.imagem
+      ? '<img src="' + p.imagem + '" style="width:36px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0;" />'
+      : '<div style="width:36px;height:36px;border-radius:6px;background:var(--surface-1);flex-shrink:0;"></div>';
+    btn.innerHTML = imgHtml + '<span style="min-width:0;"><span style="font-size:13px;font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(p.nome) + '</span><span style="font-size:11px;color:var(--text-secondary);">' + escapeHtml(p.marca) + '</span></span>';
+    btn.addEventListener('click', function(){
+      esconderResultados();
+      selecionarProdutoObjeto(p);
+    });
+    el.appendChild(btn);
+  });
+}
+async function buscarProdutoPorCodigo(codigo){
+  esconderResultados();
+  mostrarStatusBusca('Buscando produto pelo código ' + codigo + '...');
+  try {
+    var resp = await fetch('https://world.openfoodfacts.org/api/v2/product/' + encodeURIComponent(codigo) + '.json');
+    var json = await resp.json();
+    if (json && json.status === 1 && json.product) {
+      esconderStatusBusca();
+      selecionarProdutoObjeto(mapearProdutoAPI(json.product, codigo));
+      return;
+    }
+  } catch (e) {}
+  try {
+    var resp2 = await fetch('https://world.openproductsfacts.org/api/v2/product/' + encodeURIComponent(codigo) + '.json');
+    var json2 = await resp2.json();
+    if (json2 && json2.status === 1 && json2.product) {
+      esconderStatusBusca();
+      selecionarProdutoObjeto(mapearProdutoAPI(json2.product, codigo));
+      return;
+    }
+  } catch (e) {}
+  mostrarStatusBusca('Nenhum produto encontrado para o código ' + codigo + '. Tente buscar por texto ou foto.', true);
+}
+async function buscarProdutosPorTexto(query){
+  if (!query || !query.trim()) return;
+  esconderResultados();
+  mostrarStatusBusca('Buscando "' + query + '"...');
+  var candidatos = [];
+  try {
+    var url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' + encodeURIComponent(query) + '&search_simple=1&action=process&json=1&page_size=8';
+    var resp = await fetch(url);
+    var json = await resp.json();
+    if (json && json.products && json.products.length) {
+      candidatos = candidatos.concat(json.products.map(function(p){ return mapearProdutoAPI(p, p.code); }));
+    }
+  } catch (e) {}
+  if (candidatos.length === 0) {
+    try {
+      var url2 = 'https://world.openproductsfacts.org/cgi/search.pl?search_terms=' + encodeURIComponent(query) + '&search_simple=1&action=process&json=1&page_size=8';
+      var resp2 = await fetch(url2);
+      var json2 = await resp2.json();
+      if (json2 && json2.products && json2.products.length) {
+        candidatos = candidatos.concat(json2.products.map(function(p){ return mapearProdutoAPI(p, p.code); }));
+      }
+    } catch (e) {}
+  }
+  if (candidatos.length === 0) {
+    mostrarStatusBusca('Nenhum resultado para "' + query + '". Tente outro termo, código de barras ou foto.', true);
+    return;
+  }
+  esconderStatusBusca();
+  mostrarResultados(candidatos);
+}
+function iniciarBuscaPorVoz(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    mostrarStatusBusca('Busca por voz não é suportada neste navegador. Tente no Chrome (Android) ou use texto.', true);
+    return;
+  }
+  var rec = new SR();
+  rec.lang = 'pt-BR';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  mostrarStatusBusca('Ouvindo... fale o nome do produto');
+  rec.onresult = function(ev){
+    var texto = ev.results[0][0].transcript;
+    var input = document.getElementById('busca-texto');
+    if (input) input.value = texto;
+    buscarProdutosPorTexto(texto);
+  };
+  rec.onerror = function(){
+    mostrarStatusBusca('Não entendi. Tente novamente ou digite o nome do produto.', true);
+  };
+  try { rec.start(); } catch (e) {
+    mostrarStatusBusca('Não foi possível acessar o microfone.', true);
+  }
+}
+var html5QrScanner = null;
+function abrirScannerCodigoBarras(){
+  if (typeof Html5Qrcode === 'undefined') {
+    mostrarStatusBusca('Leitor de código de barras não carregou. Verifique sua conexão com a internet e tente novamente.', true);
+    return;
+  }
+  document.getElementById('scanner-overlay').style.display = 'flex';
+  html5QrScanner = new Html5Qrcode('scanner-reader');
+  html5QrScanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 260, height: 160 } },
+    function(decodedText){
+      fecharScanner();
+      buscarProdutoPorCodigo(decodedText);
+    },
+    function(){ /* ignora erros de leitura por frame */ }
+  ).catch(function(){
+    mostrarStatusBusca('Não foi possível acessar a câmera. Verifique a permissão do navegador (e que o app está sendo acessado por HTTPS).', true);
+    fecharScanner();
+  });
+}
+function fecharScanner(){
+  document.getElementById('scanner-overlay').style.display = 'none';
+  if (html5QrScanner) {
+    html5QrScanner.stop().then(function(){
+      html5QrScanner.clear();
+      html5QrScanner = null;
+    }).catch(function(){ html5QrScanner = null; });
+  }
+}
+function lidarComFotoInput(ev){
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (typeof Html5Qrcode === 'undefined') {
+    mostrarStatusBusca('Leitor de imagem não carregou. Verifique sua conexão com a internet.', true);
+    return;
+  }
+  mostrarStatusBusca('Analisando foto...');
+  var scanner = new Html5Qrcode('foto-reader-temp', false);
+  scanner.scanFile(file, false).then(function(decodedText){
+    esconderStatusBusca();
+    buscarProdutoPorCodigo(decodedText);
+  }).catch(function(){
+    mostrarStatusBusca('Não encontramos um código de barras nessa foto. Reconhecimento de produto por imagem (sem código de barras) ainda não está disponível — tente código de barras, voz ou texto.', true);
+  });
+  ev.target.value = '';
+}
+function salvarRecente(produto){
+  try {
+    var raw = localStorage.getItem('negocia_recentes');
+    var lista = raw ? JSON.parse(raw) : [];
+    lista = lista.filter(function(p){ return !(produto.codigo && p.codigo === produto.codigo) && p.nome !== produto.nome; });
+    lista.unshift(produto);
+    if (lista.length > 8) lista = lista.slice(0, 8);
+    localStorage.setItem('negocia_recentes', JSON.stringify(lista));
+  } catch (e) {}
+}
+function renderRecentes(){
+  var el = document.getElementById('busca-recentes-lista');
+  if (!el) return;
+  var lista = null;
+  try {
+    var raw = localStorage.getItem('negocia_recentes');
+    lista = raw ? JSON.parse(raw) : null;
+  } catch (e) {}
+  if (!lista || lista.length === 0) {
+    lista = [PRODUTOS.nescau, PRODUTOS.omo];
+  }
+  el.innerHTML = '';
+  lista.forEach(function(p){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.style.cssText = 'text-align:left;border:0.5px solid var(--border);padding:10px 12px;font-size:14px;';
+    btn.textContent = p.nome + (p.marca ? ' · ' + p.marca : '');
+    btn.addEventListener('click', function(){ selecionarProdutoObjeto(p); });
+    el.appendChild(btn);
+  });
+}
+
+function toggleSecaoProdutoBonus(){
+  var el = document.getElementById('secao-produto-bonus');
+  var icon = document.getElementById('icon-secao-produto-bonus');
+  var aberto = el.style.display !== 'none';
+  el.style.display = aberto ? 'none' : 'block';
+  icon.className = aberto ? 'ti ti-chevron-right' : 'ti ti-chevron-down';
+}
+function toggleSecaoCustoPraticar(){
+  var el = document.getElementById('secao-custopraticar');
+  var icon = document.getElementById('icon-secao-custopraticar');
+  var aberto = el.style.display !== 'none';
+  el.style.display = aberto ? 'none' : 'block';
+  icon.className = aberto ? 'ti ti-chevron-right' : 'ti ti-chevron-down';
+}
+
+function fecharTodosPaineis(){
+  document.getElementById('menu-panel').style.display = 'none';
+  document.getElementById('config-panel').style.display = 'none';
+  document.getElementById('ajuda-panel').style.display = 'none';
+  document.getElementById('conta-panel').style.display = 'none';
+}
+function toggleMenu(){
+  var abrindo = document.getElementById('menu-panel').style.display === 'none';
+  fecharTodosPaineis();
+  document.getElementById('menu-panel').style.display = abrindo ? 'block' : 'none';
+}
+function abrirConfig(){
+  fecharTodosPaineis();
+  document.getElementById('config-panel').style.display = 'block';
+}
+function abrirAjuda(){
+  fecharTodosPaineis();
+  document.getElementById('ajuda-panel').style.display = 'block';
+}
+function voltarMenu(){
+  fecharTodosPaineis();
+  document.getElementById('menu-panel').style.display = 'block';
+}
+function handleUserIconClick(){
+  if (!USUARIO_LOGADO){
+    fecharTodosPaineis();
+    show('login');
+  } else {
+    var abrindo = document.getElementById('conta-panel').style.display === 'none';
+    fecharTodosPaineis();
+    document.getElementById('conta-panel').style.display = abrindo ? 'block' : 'none';
+  }
+}
+function setModoLogin(modo){
+  modoLogin = modo;
+  limparErroLogin();
+  var isCriar = modo === 'criar';
+  document.getElementById('campo-nome').style.display = isCriar ? 'block' : 'none';
+  document.getElementById('campo-confirmar-senha').style.display = isCriar ? 'block' : 'none';
+  document.getElementById('esqueci-senha').style.display = isCriar ? 'none' : 'block';
+  document.getElementById('btn-login-principal').textContent = isCriar ? 'Criar conta' : 'Entrar';
+  document.getElementById('login-subtitulo').textContent = isCriar ? 'Crie sua conta para assinar o Negocia AI Premium' : 'Entre para desbloquear o Premium e sincronizar seus dados';
+  document.getElementById('tab-entrar').style.background = isCriar ? 'transparent' : 'var(--surface-2)';
+  document.getElementById('tab-criar').style.background = isCriar ? 'var(--surface-2)' : 'transparent';
+  document.getElementById('login-footer').innerHTML = isCriar
+    ? 'Já tem conta? <button type="button" onclick="setModoLogin(\'entrar\')" style="border:none;background:transparent;padding:0;font-size:12px;color:var(--text-accent);font-weight:500;">Entrar</button>'
+    : 'Ainda não tem conta? <button type="button" onclick="setModoLogin(\'criar\')" style="border:none;background:transparent;padding:0;font-size:12px;color:var(--text-accent);font-weight:500;">Criar conta</button>';
+}
+function atualizarIconeUsuario(){
+  var icon = document.getElementById('icon-user');
+  if (USUARIO_LOGADO){
+    icon.className = 'ti ti-user-check';
+    icon.style.color = 'var(--text-accent)';
+  } else {
+    icon.className = 'ti ti-user-circle';
+    icon.style.color = 'var(--text-secondary)';
+  }
+}
+function atualizarPainelConta(){
+  if (!USUARIO_ATUAL) return;
+  var base = (USUARIO_ATUAL.displayName || USUARIO_ATUAL.email || 'U').trim();
+  var elInicial = document.getElementById('conta-avatar-inicial');
+  var elNome = document.getElementById('conta-nome');
+  var elEmail = document.getElementById('conta-email');
+  if (elInicial) elInicial.textContent = base.charAt(0).toUpperCase();
+  if (elNome) elNome.textContent = USUARIO_ATUAL.displayName || 'Minha conta';
+  if (elEmail) elEmail.textContent = USUARIO_ATUAL.email || '';
+}
+function mostrarErroLogin(msg, erro){
+  var el = document.getElementById('login-status');
+  if (!el) return;
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.style.color = (erro === false) ? 'var(--text-success)' : 'var(--text-danger)';
+}
+function limparErroLogin(){
+  var el = document.getElementById('login-status');
+  if (el) el.style.display = 'none';
+}
+function traduzirErroFirebase(e){
+  var code = e && e.code;
+  var mapa = {
+    'auth/email-already-in-use': 'Esse e-mail já tem uma conta. Tente entrar.',
+    'auth/invalid-email': 'E-mail inválido.',
+    'auth/weak-password': 'A senha é muito fraca (mínimo 6 caracteres).',
+    'auth/user-not-found': 'Não encontramos conta com esse e-mail.',
+    'auth/wrong-password': 'Senha incorreta.',
+    'auth/invalid-credential': 'E-mail ou senha incorretos.',
+    'auth/too-many-requests': 'Muitas tentativas. Aguarde um pouco e tente de novo.',
+    'auth/popup-closed-by-user': 'Login cancelado.',
+    'auth/network-request-failed': 'Falha de conexão. Verifique sua internet.'
+  };
+  return (code && mapa[code]) || ('Não foi possível entrar' + (code ? ' (' + code + ')' : '') + '.');
+}
+async function fazerLogin(){
+  limparErroLogin();
+  if (!FIREBASE_CONFIGURADO) {
+    mostrarErroLogin('Login ainda não configurado. Veja as instruções no arquivo negocia-ai-notas-tecnicas.md para ativar.');
+    return;
+  }
+  var email = (document.getElementById('login-email').value || '').trim();
+  var senha = document.getElementById('login-senha').value || '';
+  if (!email || !senha) { mostrarErroLogin('Preencha e-mail e senha.'); return; }
+
+  if (modoLogin === 'criar') {
+    var nome = (document.getElementById('login-nome').value || '').trim();
+    var confirmar = document.getElementById('login-confirmar-senha').value || '';
+    if (senha !== confirmar) { mostrarErroLogin('As senhas não coincidem.'); return; }
+    if (senha.length < 6) { mostrarErroLogin('A senha precisa ter pelo menos 6 caracteres.'); return; }
+    try {
+      var cred = await firebase.auth().createUserWithEmailAndPassword(email, senha);
+      if (nome && cred.user) { await cred.user.updateProfile({ displayName: nome }); }
+    } catch (e) {
+      mostrarErroLogin(traduzirErroFirebase(e));
+      return;
+    }
+  } else {
+    try {
+      await firebase.auth().signInWithEmailAndPassword(email, senha);
+    } catch (e) {
+      mostrarErroLogin(traduzirErroFirebase(e));
+      return;
+    }
+  }
+  /* onAuthStateChanged cuida de atualizar a UI e navegar para Buscar */
+}
+async function fazerLoginGoogle(){
+  limparErroLogin();
+  if (!FIREBASE_CONFIGURADO) {
+    mostrarErroLogin('Login ainda não configurado. Veja as instruções no arquivo negocia-ai-notas-tecnicas.md para ativar.');
+    return;
+  }
+  try {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    await firebase.auth().signInWithPopup(provider);
+  } catch (e) {
+    mostrarErroLogin(traduzirErroFirebase(e));
+  }
+}
+async function esqueciSenha(){
+  limparErroLogin();
+  if (!FIREBASE_CONFIGURADO) {
+    mostrarErroLogin('Login ainda não configurado.');
+    return;
+  }
+  var email = (document.getElementById('login-email').value || '').trim();
+  if (!email) { mostrarErroLogin('Digite seu e-mail acima primeiro.'); return; }
+  try {
+    await firebase.auth().sendPasswordResetEmail(email);
+    mostrarErroLogin('Enviamos um e-mail para redefinir sua senha.', false);
+  } catch (e) {
+    mostrarErroLogin(traduzirErroFirebase(e));
+  }
+}
+function fazerLogout(){
+  if (FIREBASE_CONFIGURADO) {
+    firebase.auth().signOut();
+  }
+  document.getElementById('conta-panel').style.display = 'none';
+}
+if (FIREBASE_CONFIGURADO) {
+  firebase.auth().onAuthStateChanged(function(user){
+    var estavaDeslogado = !USUARIO_LOGADO;
+    USUARIO_ATUAL = user;
+    USUARIO_LOGADO = !!user;
+    atualizarIconeUsuario();
+    if (user) {
+      atualizarPainelConta();
+      var telaLogin = document.getElementById('screen-login');
+      if (estavaDeslogado && telaLogin && telaLogin.style.display !== 'none') {
+        show('buscar');
+      }
+    }
+  });
+}
+
+function show(name){
+  TODAS_TELAS.forEach(function(s){
+    document.getElementById('screen-'+s).style.display = (s===name) ? 'block' : 'none';
+  });
+  ['nav-buscar','nav-produto','nav-precos','nav-calculadoras','nav-notas'].forEach(function(id){
+    var btn = document.getElementById(id);
+    if (btn) btn.style.color = '';
+  });
+  var activeNav = NAV_MAP[name];
+  if (activeNav){
+    var btn = document.getElementById(activeNav);
+    if (btn) btn.style.color = 'var(--text-accent)';
+  }
+  window.scrollTo(0,0);
+}
+function fmt(v){ return 'R$ ' + (isFinite(v)?v:0).toFixed(2).replace('.', ','); }
+function margemMarkup(preco, custo){
+  var margem = custo>0 ? ((preco-custo)/preco*100) : 0;
+  var markup = custo>0 ? ((preco-custo)/custo*100) : 0;
+  return 'Margem ' + margem.toFixed(1).replace('.', ',') + '% · Markup ' + markup.toFixed(1).replace('.', ',') + '%';
+}
+function getAjustes(){
+  return {
+    baixo: parseFloat(document.getElementById('cfg-baixo').value) || 0,
+    comp: parseFloat(document.getElementById('cfg-comp').value) || 0,
+    alto: parseFloat(document.getElementById('cfg-alto').value) || 0
+  };
+}
+function getPrecos(){
+  var aj = getAjustes();
+  return {
+    baixo: Math.max(REGIAO.menor + aj.baixo, 0),
+    comp: Math.max(REGIAO.media + aj.comp, 0),
+    alto: Math.max(REGIAO.maior + aj.alto, 0)
+  };
+}
+function calc(){
+  var custo = parseFloat(document.getElementById('custo').value) || 0;
+  var precos = getPrecos();
+  document.getElementById('p-baixo').textContent = fmt(precos.baixo);
+  document.getElementById('p-comp').textContent = fmt(precos.comp);
+  document.getElementById('p-alto').textContent = fmt(precos.alto);
+  document.getElementById('m-baixo').textContent = margemMarkup(precos.baixo, custo);
+  document.getElementById('m-comp').textContent = margemMarkup(precos.comp, custo);
+  document.getElementById('m-alto').textContent = margemMarkup(precos.alto, custo);
+
+  var precoCliente = parseFloat(document.getElementById('precoCliente').value) || 0;
+  document.getElementById('p-cliente').textContent = fmt(precoCliente);
+  document.getElementById('m-cliente').textContent = margemMarkup(precoCliente, custo);
+}
+function calcBonus(){
+  var custo = parseFloat(document.getElementById('bcusto').value) || 0;
+  var unid = parseFloat(document.getElementById('bunid').value) || 1;
+  var caixas = parseFloat(document.getElementById('bcaixas').value) || 0;
+  var custoPraticar = parseFloat(document.getElementById('bprecocli').value) || 0;
+  var compre = parseFloat(document.getElementById('bcompre').value) || 0;
+  var ganhe = parseFloat(document.getElementById('bganhe').value) || 0;
+  var investPct = parseFloat(document.getElementById('binvestpct').value) || 0;
+
+  var promoBonusCaixasCompra = compre>0 ? Math.floor(caixas/compre)*ganhe : 0;
+  var promoBonusCaixasPct = caixas * (investPct/100);
+  var promoBonusCaixasTotal = promoBonusCaixasCompra + promoBonusCaixasPct;
+
+  var custoEfetivoUnidade = (caixas+promoBonusCaixasTotal)>0
+    ? (caixas*custo)/(caixas+promoBonusCaixasTotal)
+    : custo;
+  document.getElementById('b-custoun').textContent = fmt(custoEfetivoUnidade);
+  document.getElementById('b-custocx').textContent = fmt(custoEfetivoUnidade*unid);
+
+  var precos = getPrecos();
+  document.getElementById('b-p-baixo').textContent = fmt(precos.baixo);
+  document.getElementById('b-p-comp').textContent = fmt(precos.comp);
+  document.getElementById('b-p-alto').textContent = fmt(precos.alto);
+  document.getElementById('b-m-baixo').textContent = margemMarkup(precos.baixo, custoEfetivoUnidade);
+  document.getElementById('b-m-comp').textContent = margemMarkup(precos.comp, custoEfetivoUnidade);
+  document.getElementById('b-m-alto').textContent = margemMarkup(precos.alto, custoEfetivoUnidade);
+
+  var unidadesPedidas = caixas*unid;
+  var bonusUnidadesNecessarias = custoPraticar>0
+    ? Math.max(unidadesPedidas*(custo-custoPraticar)/custoPraticar, 0)
+    : 0;
+  var valorCaixaCusto = custo*unid;
+  var bonusValorTotal = bonusUnidadesNecessarias*custo;
+  var bonusPorUnidade = unidadesPedidas>0 ? bonusValorTotal/unidadesPedidas : 0;
+  var equivalenteCaixas = unid>0 ? bonusUnidadesNecessarias/unid : 0;
+  var caixasInteiras = Math.floor(equivalenteCaixas + 1e-9);
+  var restoValor = Math.max(equivalenteCaixas-caixasInteiras, 0)*valorCaixaCusto;
+
+  document.getElementById('b-bunit').textContent = fmt(bonusPorUnidade);
+  document.getElementById('b-btotal').textContent = fmt(bonusValorTotal);
+  document.getElementById('b-bcx').textContent = equivalenteCaixas.toFixed(1).replace('.', ',') + ' caixas';
+  if (bonusValorTotal<=0.01){
+    document.getElementById('b-sugestao').textContent = 'Nenhuma bonificação necessária';
+  } else if (caixasInteiras<=0){
+    document.getElementById('b-sugestao').textContent = fmt(restoValor);
+  } else {
+    document.getElementById('b-sugestao').textContent = caixasInteiras + ' caixa' + (caixasInteiras===1?'':'s') + (restoValor>0.01 ? ' + ' + fmt(restoValor) : '');
+  }
+}
+function calcSimulador(){
+  var custo = parseFloat(document.getElementById('sim-custo').value) || 0;
+  var preco = parseFloat(document.getElementById('sim-preco').value) || 0;
+
+  var icmsEValor = custo * TAX.icmsEntrada;
+  var pcEValor = (custo - icmsEValor) * TAX.pcEntrada;
+  var totalEntrada = icmsEValor + pcEValor;
+
+  var icmsSValor = preco * TAX.icmsSaida;
+  var pcSValor = (preco - icmsSValor) * TAX.pcSaida;
+  var totalSaida = icmsSValor + pcSValor;
+
+  var saldo = totalSaida - totalEntrada;
+  var lucroZero = custo + saldo;
+  var margem = preco>0 ? ((preco - lucroZero)/preco*100) : 0;
+  var markup = custo>0 ? ((preco-custo)/custo*100) : 0;
+
+  document.getElementById('sim-icmse-valor').textContent = fmt(icmsEValor);
+  document.getElementById('sim-pce-valor').textContent = fmt(pcEValor);
+  document.getElementById('sim-totalentrada').textContent = fmt(totalEntrada);
+  document.getElementById('sim-icmss-valor').textContent = fmt(icmsSValor);
+  document.getElementById('sim-pcs-valor').textContent = fmt(pcSValor);
+  document.getElementById('sim-totalsaida').textContent = fmt(totalSaida);
+  document.getElementById('sim-saldo').textContent = fmt(saldo);
+  document.getElementById('sim-lucrozero').textContent = fmt(lucroZero);
+  document.getElementById('sim-margem').textContent = margem.toFixed(2).replace('.', ',') + '%';
+  document.getElementById('sim-markup').textContent = markup.toFixed(2).replace('.', ',') + '%';
+}
+function calcSellOut(){
+  var custo = parseFloat(document.getElementById('so-custo').value) || 0;
+  var preco = parseFloat(document.getElementById('so-preco').value) || 0;
+  var margemObj = (parseFloat(document.getElementById('so-margemobj').value) || 0) / 100;
+
+  var kE = TAX.icmsEntrada + (1-TAX.icmsEntrada)*TAX.pcEntrada;
+  var kS = TAX.icmsSaida + (1-TAX.icmsSaida)*TAX.pcSaida;
+
+  var custoAtualizado = preco>0 ? preco*(1-kS-margemObj)/(1-kE) : 0;
+  custoAtualizado = Math.max(custoAtualizado, 0);
+  var investimento = custo - custoAtualizado;
+
+  var icmsEValor = custoAtualizado * TAX.icmsEntrada;
+  var pcEValor = (custoAtualizado - icmsEValor) * TAX.pcEntrada;
+  var totalEntrada = icmsEValor + pcEValor;
+
+  var icmsSValor = preco * TAX.icmsSaida;
+  var pcSValor = (preco - icmsSValor) * TAX.pcSaida;
+  var totalSaida = icmsSValor + pcSValor;
+
+  var saldo = totalSaida - totalEntrada;
+  var lucroZero = custoAtualizado + saldo;
+  var margemFinal = preco>0 ? ((preco-lucroZero)/preco*100) : 0;
+
+  document.getElementById('so-investimento').textContent = fmt(investimento);
+  document.getElementById('so-custoatualizado').textContent = fmt(custoAtualizado);
+  document.getElementById('so-icmse-valor').textContent = fmt(icmsEValor);
+  document.getElementById('so-pce-valor').textContent = fmt(pcEValor);
+  document.getElementById('so-totalentrada').textContent = fmt(totalEntrada);
+  document.getElementById('so-icmss-valor').textContent = fmt(icmsSValor);
+  document.getElementById('so-pcs-valor').textContent = fmt(pcSValor);
+  document.getElementById('so-totalsaida').textContent = fmt(totalSaida);
+  document.getElementById('so-saldo').textContent = fmt(saldo);
+  document.getElementById('so-lucrozero').textContent = fmt(lucroZero);
+  document.getElementById('so-margemfinal').textContent = margemFinal.toFixed(2).replace('.', ',') + '%';
+}
+
+/* ---- Busca de preços com IA (backend próprio + Claude web search) ---- */
+function mostrarStatusPrecosIA(msg, erro){
+  var el = document.getElementById('precos-ia-status');
+  if (!el) return;
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.style.color = erro ? 'var(--text-danger)' : 'var(--text-accent)';
+}
+function esconderStatusPrecosIA(){
+  var el = document.getElementById('precos-ia-status');
+  if (el) el.style.display = 'none';
+}
+function esconderResultadosPrecosIA(){
+  var el = document.getElementById('precos-ia-resultados');
+  if (el) { el.style.display = 'none'; el.innerHTML = ''; }
+}
+function renderPrecosIA(resultados, observacao, fontes){
+  var el = document.getElementById('precos-ia-resultados');
+  if (!el) return;
+  el.innerHTML = '';
+  el.style.display = 'flex';
+
+  if (!resultados || resultados.length === 0) {
+    var vazio = document.createElement('p');
+    vazio.style.cssText = 'font-size:12px;color:var(--text-secondary);';
+    vazio.textContent = 'Nenhum preço confiável encontrado dessa vez.' + (observacao ? ' ' + observacao : '');
+    el.appendChild(vazio);
+    return;
+  }
+
+  resultados.forEach(function(r){
+    var div = document.createElement('div');
+    div.style.cssText = 'background:var(--surface-2);border-radius:var(--radius);padding:10px 12px;';
+    var linha = document.createElement('div');
+    linha.style.cssText = 'display:flex;justify-content:space-between;gap:8px;';
+    var nome = document.createElement('span');
+    nome.style.cssText = 'font-size:13px;font-weight:500;';
+    nome.textContent = r.loja || 'Estabelecimento';
+    var preco = document.createElement('span');
+    preco.style.cssText = 'font-size:13px;font-weight:600;color:var(--text-accent);flex-shrink:0;';
+    preco.textContent = r.precoTexto || '—';
+    linha.appendChild(nome);
+    linha.appendChild(preco);
+    div.appendChild(linha);
+    if (r.fonteUrl) {
+      var link = document.createElement('a');
+      link.href = r.fonteUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'Ver fonte';
+      link.style.cssText = 'display:inline-block;margin-top:4px;font-size:11px;color:var(--text-secondary);';
+      div.appendChild(link);
+    }
+    el.appendChild(div);
+  });
+
+  if (observacao) {
+    var obs = document.createElement('p');
+    obs.style.cssText = 'font-size:11px;color:var(--text-secondary);margin-top:2px;';
+    obs.textContent = observacao;
+    el.appendChild(obs);
+  }
+}
+function buscarPrecosComIA(){
+  if (!PRECOS_IA_CONFIGURADO) {
+    mostrarStatusPrecosIA('Busca com IA ainda não configurada (veja negocia-ai-notas-tecnicas.md).', true);
+    return;
+  }
+  var raioInput = document.getElementById('raio-km-ia');
+  var raioKm = parseFloat(raioInput.value) || 2;
+  if (raioKm > 20) { raioKm = 20; raioInput.value = 20; }
+  if (raioKm < 0.5) { raioKm = 0.5; raioInput.value = 0.5; }
+
+  esconderResultadosPrecosIA();
+  if (!navigator.geolocation) {
+    mostrarStatusPrecosIA('Geolocalização não é suportada neste navegador.', true);
+    return;
+  }
+  mostrarStatusPrecosIA('Obtendo sua localização...');
+  navigator.geolocation.getCurrentPosition(async function(pos){
+    var lat = pos.coords.latitude;
+    var lon = pos.coords.longitude;
+    mostrarStatusPrecosIA('Procurando estabelecimentos com e-commerce por perto...');
+    var itens;
+    try {
+      itens = await obterItensOSM(lat, lon, raioKm);
+    } catch (e) {
+      mostrarStatusPrecosIA('Não foi possível buscar estabelecimentos agora (serviço público pode estar sobrecarregado). Tente novamente.', true);
+      return;
+    }
+    var comSite = itens.filter(function(it){ return !!it.website; });
+    if (comSite.length === 0) {
+      mostrarStatusPrecosIA('Nenhum estabelecimento próximo (raio de ' + raioKm + ' km) tem site/e-commerce cadastrado. Não é possível buscar o preço automaticamente — tente aumentar o raio, ou confira manualmente na lista "Estabelecimentos próximos" abaixo.', true);
+      return;
+    }
+    mostrarStatusPrecosIA('Verificando o preço em ' + comSite.length + ' site' + (comSite.length > 1 ? 's' : '') + ' próximo' + (comSite.length > 1 ? 's' : '') + '...');
+    try {
+      var resp = await fetch(PRECOS_IA_WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Negocia-Key': PRECOS_IA_CHAVE_APP },
+        body: JSON.stringify({
+          estabelecimentos: comSite.slice(0, 10).map(function(it){
+            return { nome: it.nome, website: it.website, distanciaKm: it.distanciaKm };
+          }),
+          produto: PRODUTO_ATUAL ? PRODUTO_ATUAL.nome : ''
+        })
+      });
+      var json = await resp.json();
+      if (!resp.ok || !json.ok) {
+        mostrarStatusPrecosIA(json.erro || 'Não foi possível buscar agora. Tente novamente.', true);
+        return;
+      }
+      esconderStatusPrecosIA();
+      if (!json.resultados || json.resultados.length === 0) {
+        mostrarStatusPrecosIA('Verificamos ' + comSite.length + ' site' + (comSite.length > 1 ? 's' : '') + ' próximo' + (comSite.length > 1 ? 's' : '') + ' e nenhum divulga o preço desse produto online.' + (json.observacao ? (' ' + json.observacao) : ''), true);
+        return;
+      }
+      renderPrecosIA(json.resultados, json.observacao, json.fontes);
+    } catch (e) {
+      mostrarStatusPrecosIA('Falha ao conectar com o serviço de busca. Tente novamente.', true);
+    }
+  }, function(){
+    mostrarStatusPrecosIA('Não conseguimos acessar sua localização. Verifique a permissão do navegador (e que o app está sendo acessado por HTTPS).', true);
+  }, { enableHighAccuracy: true, timeout: 12000 });
+}
+
+/* ---- Estabelecimentos próximos (geolocalização + OpenStreetMap) ---- */
+function calcularDistanciaKm(lat1, lon1, lat2, lon2){
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLon = (lon2 - lon1) * Math.PI / 180;
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+function mostrarStatusRegiao(msg, erro){
+  var el = document.getElementById('regiao-status');
+  if (!el) return;
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.style.color = erro ? 'var(--text-danger)' : 'var(--text-secondary)';
+}
+function esconderStatusRegiao(){
+  var el = document.getElementById('regiao-status');
+  if (el) el.style.display = 'none';
+}
+function esconderResultadosRegiao(){
+  var el = document.getElementById('regiao-resultados');
+  if (el) { el.style.display = 'none'; el.innerHTML = ''; }
+}
+function renderEstabelecimentosProximos(itens){
+  var el = document.getElementById('regiao-resultados');
+  if (!el) return;
+  el.innerHTML = '';
+  el.style.display = 'flex';
+  itens.forEach(function(it){
+    var div = document.createElement('div');
+    div.style.cssText = 'border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;';
+
+    var linha1 = document.createElement('div');
+    linha1.style.cssText = 'display:flex;justify-content:space-between;align-items:baseline;gap:8px;';
+    var nome = document.createElement('span');
+    nome.style.cssText = 'font-size:14px;font-weight:500;';
+    nome.textContent = it.nome;
+    var dist = document.createElement('span');
+    dist.style.cssText = 'font-size:12px;color:var(--text-secondary);flex-shrink:0;';
+    dist.textContent = it.distanciaKm < 1 ? Math.round(it.distanciaKm * 1000) + ' m' : it.distanciaKm.toFixed(1).replace('.', ',') + ' km';
+    linha1.appendChild(nome);
+    linha1.appendChild(dist);
+    div.appendChild(linha1);
+
+    if (it.endereco) {
+      var end = document.createElement('p');
+      end.style.cssText = 'font-size:12px;color:var(--text-secondary);margin-top:2px;';
+      end.textContent = it.endereco;
+      div.appendChild(end);
+    }
+
+    var acoes = document.createElement('div');
+    acoes.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;';
+    var buscaUrl = 'https://www.google.com/search?q=' + encodeURIComponent(it.nome + ' ' + (PRODUTO_ATUAL ? PRODUTO_ATUAL.nome : '') + ' preço');
+    var btnBusca = document.createElement('a');
+    btnBusca.href = buscaUrl;
+    btnBusca.target = '_blank';
+    btnBusca.rel = 'noopener noreferrer';
+    btnBusca.textContent = 'Conferir preço';
+    btnBusca.style.cssText = 'font-size:11px;padding:5px 10px;border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text-accent);text-decoration:none;';
+    acoes.appendChild(btnBusca);
+    if (it.website) {
+      var siteUrl = it.website.indexOf('http') === 0 ? it.website : ('https://' + it.website);
+      var btnSite = document.createElement('a');
+      btnSite.href = siteUrl;
+      btnSite.target = '_blank';
+      btnSite.rel = 'noopener noreferrer';
+      btnSite.textContent = 'Site da loja';
+      btnSite.style.cssText = 'font-size:11px;padding:5px 10px;border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text-secondary);text-decoration:none;';
+      acoes.appendChild(btnSite);
+    }
+    div.appendChild(acoes);
+    el.appendChild(div);
+  });
+}
+async function obterItensOSM(lat, lon, raioKm){
+  var raioMetros = Math.round(raioKm * 1000);
+  var query = '[out:json][timeout:25];(node["shop"](around:' + raioMetros + ',' + lat + ',' + lon + ');way["shop"](around:' + raioMetros + ',' + lat + ',' + lon + '););out center tags;';
+  var resp = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query) });
+  if (!resp.ok) throw new Error('overpass falhou');
+  var json = await resp.json();
+  var tiposRelevantes = ['supermarket', 'convenience', 'grocery', 'department_store', 'general', 'kiosk', 'wholesale', 'mall', 'variety_store', 'beverages', 'alcohol', 'bakery'];
+  var itens = (json.elements || []).map(function(el){
+    var tags = el.tags || {};
+    var elLat = el.lat || (el.center && el.center.lat);
+    var elLon = el.lon || (el.center && el.center.lon);
+    if (!elLat || !elLon || !tags.name) return null;
+    return {
+      nome: tags.name,
+      tipo: tags.shop,
+      endereco: [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(', ') || null,
+      website: tags.website || tags['contact:website'] || null,
+      distanciaKm: calcularDistanciaKm(lat, lon, elLat, elLon)
+    };
+  }).filter(function(x){ return x && tiposRelevantes.indexOf(x.tipo) !== -1; });
+  itens.sort(function(a, b){ return a.distanciaKm - b.distanciaKm; });
+  return itens.slice(0, 20);
+}
+function buscarEstabelecimentosProximos(){
+  var raioInput = document.getElementById('raio-km');
+  var raioKm = parseFloat(raioInput.value) || 3;
+  if (raioKm > 20) { raioKm = 20; raioInput.value = 20; }
+  if (raioKm < 0.5) { raioKm = 0.5; raioInput.value = 0.5; }
+
+  esconderResultadosRegiao();
+  if (!navigator.geolocation) {
+    mostrarStatusRegiao('Geolocalização não é suportada neste navegador.', true);
+    return;
+  }
+  mostrarStatusRegiao('Obtendo sua localização...');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat = pos.coords.latitude;
+    var lon = pos.coords.longitude;
+    mostrarStatusRegiao('Buscando estabelecimentos num raio de ' + raioKm + ' km...');
+    obterItensOSM(lat, lon, raioKm).then(function(itens){
+      esconderStatusRegiao();
+      if (itens.length === 0) {
+        mostrarStatusRegiao('Nenhum estabelecimento encontrado nesse raio. Tente aumentar a distância.', true);
+        return;
+      }
+      renderEstabelecimentosProximos(itens);
+    }).catch(function(){
+      mostrarStatusRegiao('Não foi possível buscar agora (o serviço público do OpenStreetMap pode estar sobrecarregado). Tente novamente em instantes.', true);
+    });
+  }, function(){
+    mostrarStatusRegiao('Não conseguimos acessar sua localização. Verifique a permissão do navegador (e que o app está sendo acessado por HTTPS).', true);
+  }, { enableHighAccuracy: true, timeout: 12000 });
+}
+
+/* ---- Google Agenda (Calendar API) ---- */
+function garantirTokenClientGoogle(){
+  if (GOOGLE_TOKEN_CLIENT || !GOOGLE_CALENDAR_CONFIGURADO) return GOOGLE_TOKEN_CLIENT;
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return null;
+  GOOGLE_TOKEN_CLIENT = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CALENDAR_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/calendar.events',
+    callback: function(resp){
+      if (resp && resp.access_token) {
+        GOOGLE_ACCESS_TOKEN = resp.access_token;
+        GOOGLE_TOKEN_EXPIRA = Date.now() + (((resp.expires_in || 3600) - 60) * 1000);
+      }
+      if (typeof _resolverTokenPendente === 'function') {
+        var r = _resolverTokenPendente;
+        _resolverTokenPendente = null;
+        r(resp && resp.access_token ? resp.access_token : null);
+      }
+    },
+    error_callback: function(){
+      if (typeof _resolverTokenPendente === 'function') {
+        var r = _resolverTokenPendente;
+        _resolverTokenPendente = null;
+        r(null);
+      }
+    }
+  });
+  return GOOGLE_TOKEN_CLIENT;
+}
+function obterTokenGoogle(interativo){
+  return new Promise(function(resolve){
+    if (!GOOGLE_CALENDAR_CONFIGURADO) { resolve(null); return; }
+    if (GOOGLE_ACCESS_TOKEN && Date.now() < GOOGLE_TOKEN_EXPIRA) { resolve(GOOGLE_ACCESS_TOKEN); return; }
+    var client = garantirTokenClientGoogle();
+    if (!client) { resolve(null); return; }
+    _resolverTokenPendente = resolve;
+    try {
+      client.requestAccessToken({ prompt: interativo ? 'consent' : '' });
+    } catch (e) {
+      _resolverTokenPendente = null;
+      resolve(null);
+    }
+  });
+}
+async function conectarGoogleAgenda(){
+  var el = document.getElementById('google-agenda-status-form');
+  if (!GOOGLE_CALENDAR_CONFIGURADO) {
+    if (el) { el.style.display = 'block'; el.textContent = 'Google Agenda ainda não configurado (veja negocia-ai-notas-tecnicas.md).'; el.style.color = 'var(--text-warning)'; }
+    return;
+  }
+  if (el) { el.style.display = 'block'; el.textContent = 'Conectando...'; el.style.color = 'var(--text-secondary)'; }
+  var token = await obterTokenGoogle(true);
+  if (el) {
+    if (token) { el.textContent = 'Conectado ao Google Agenda ✓'; el.style.color = 'var(--text-success)'; }
+    else { el.textContent = 'Não foi possível conectar. Tente novamente.'; el.style.color = 'var(--text-danger)'; }
+  }
+}
+function pad2(n){ return String(n).padStart(2, '0'); }
+function isoDataHora(data, hora){
+  return data + 'T' + (hora || '09:00') + ':00';
+}
+function isoDataHoraMaisMinutos(data, hora, minutos){
+  var d = new Date(data + 'T' + (hora || '09:00') + ':00');
+  d.setMinutes(d.getMinutes() + minutos);
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':00';
+}
+async function sincronizarLembreteGoogle(nota, interativo){
+  if (!GOOGLE_CALENDAR_CONFIGURADO || !nota.lembrete || !nota.lembrete.data) return false;
+  var token = await obterTokenGoogle(interativo);
+  if (!token) return false;
+  try {
+    var body = {
+      summary: nota.titulo,
+      description: (nota.cliente ? 'Cliente: ' + nota.cliente + '\n\n' : '') + (nota.texto || ''),
+      start: { dateTime: isoDataHora(nota.lembrete.data, nota.lembrete.hora), timeZone: 'America/Sao_Paulo' },
+      end: { dateTime: isoDataHoraMaisMinutos(nota.lembrete.data, nota.lembrete.hora, 30), timeZone: 'America/Sao_Paulo' },
+      reminders: { useDefault: true }
+    };
+    var url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+    if (nota.lembrete.email) {
+      body.attendees = [{ email: nota.lembrete.email }];
+      url += '?sendUpdates=all';
+    }
+    var resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) return false;
+    var json = await resp.json();
+    nota.lembrete.sincronizado = true;
+    nota.lembrete.eventoId = json.id;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+async function sincronizarLembreteAgora(){
+  if (notaAtualIndex === null || notaAtualIndex === undefined) return;
+  var nota = NOTAS[notaAtualIndex];
+  var ok = await sincronizarLembreteGoogle(nota, true);
+  if (ok) { salvarNotasStorage(); renderNotas(); }
+  abrirDetalhe(notaAtualIndex);
+}
+
+function formatarLembrete(l){
+  if(!l || !l.data) return '';
+  var partes = l.data.split('-');
+  var dataFmt = partes.length===3 ? (partes[2]+'/'+partes[1]+'/'+partes[0]) : l.data;
+  return dataFmt + (l.hora ? ' às ' + l.hora : '');
+}
+function statusInfo(status){
+  var concluida = status === 'concluida';
+  return {
+    label: concluida ? 'Concluída' : 'Pendente',
+    bg: concluida ? 'var(--bg-success)' : 'var(--bg-warning)',
+    color: concluida ? 'var(--text-success)' : 'var(--text-warning)',
+    actionLabel: concluida ? 'Reabrir' : 'Marcar como concluída'
+  };
+}
+function toggleLembreteCampos(){
+  var d = document.getElementById('lembrete-campos');
+  d.style.display = document.getElementById('nota-lembrete-ativo').checked ? 'block' : 'none';
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function renderAnexosForm(){
+  var lista = document.getElementById('anexos-lista');
+  if (!lista) return;
+  lista.innerHTML = '';
+  formAnexos.forEach(function(a, idx){
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-secondary);padding:2px 0;';
+    var span = document.createElement('span');
+    span.innerHTML = '<i class="ti ti-paperclip" style="font-size:12px;vertical-align:-1px;margin-right:3px;" aria-hidden="true"></i>' + escapeHtml(a.name);
+    var delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.setAttribute('aria-label', 'Remover anexo ' + a.name);
+    delBtn.style.cssText = 'border:none;background:transparent;padding:2px 6px;color:var(--text-secondary);';
+    delBtn.innerHTML = '<i class="ti ti-x" style="font-size:12px;" aria-hidden="true"></i>';
+    delBtn.addEventListener('click', (function(indexAtCreation){
+      return function(){
+        formAnexos.splice(indexAtCreation, 1);
+        renderAnexosForm();
+      };
+    })(idx));
+    row.appendChild(span);
+    row.appendChild(delBtn);
+    lista.appendChild(row);
+  });
+}
+function mostrarAnexos(){
+  var input = document.getElementById('nota-anexos');
+  Array.prototype.forEach.call(input.files, function(f){
+    formAnexos.push({name:f.name});
+  });
+  input.value = '';
+  renderAnexosForm();
+}
+function renderNotas(){
+  var lista = document.getElementById('notas-lista');
+  lista.innerHTML = '';
+  NOTAS.forEach(function(n, i){
+    if (confirmandoExclusaoIndex === i){
+      var confirmDiv = document.createElement('div');
+      confirmDiv.style.cssText = 'border:0.5px solid var(--border-danger);background:var(--bg-danger);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;';
+      var msg = document.createElement('span');
+      msg.style.cssText = 'font-size:12px;color:var(--text-danger);';
+      msg.textContent = 'Excluir "' + n.titulo + '"?';
+      var btnGroup = document.createElement('div');
+      btnGroup.style.cssText = 'display:flex;gap:6px;flex-shrink:0;';
+      var confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      confirmBtn.textContent = 'Excluir';
+      confirmBtn.style.cssText = 'font-size:12px;padding:4px 10px;border-color:var(--border-danger);color:var(--text-danger);';
+      confirmBtn.addEventListener('click', (function(index){
+        return function(){
+          NOTAS.splice(index, 1);
+          confirmandoExclusaoIndex = null;
+          salvarNotasStorage();
+          renderNotas();
+        };
+      })(i));
+      var cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancelar';
+      cancelBtn.style.cssText = 'font-size:12px;padding:4px 10px;';
+      cancelBtn.addEventListener('click', function(){
+        confirmandoExclusaoIndex = null;
+        renderNotas();
+      });
+      btnGroup.appendChild(confirmBtn);
+      btnGroup.appendChild(cancelBtn);
+      confirmDiv.appendChild(msg);
+      confirmDiv.appendChild(btnGroup);
+      lista.appendChild(confirmDiv);
+      return;
+    }
+
+    var div = document.createElement('div');
+    div.style.cssText = 'border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;';
+    div.onclick = function(){ abrirDetalhe(i); };
+    var left = document.createElement('div');
+    var t = document.createElement('p');
+    t.style.cssText = 'font-size:14px;font-weight:500;';
+    t.textContent = n.titulo;
+    var c = document.createElement('p');
+    c.style.cssText = 'font-size:12px;color:var(--text-secondary);margin-top:2px;';
+    c.textContent = n.cliente;
+    left.appendChild(t); left.appendChild(c);
+
+    var info = statusInfo(n.status || 'pendente');
+    var badge = document.createElement('span');
+    badge.style.cssText = 'display:inline-block;font-size:10px;padding:2px 6px;border-radius:var(--radius);margin-top:5px;background:'+info.bg+';color:'+info.color+';';
+    badge.textContent = info.label;
+    left.appendChild(badge);
+
+    if (n.lembrete){
+      var lem = document.createElement('p');
+      lem.style.cssText = 'font-size:11px;color:var(--text-accent);margin-top:5px;';
+      lem.innerHTML = '<i class="ti ti-bell" style="font-size:12px;vertical-align:-1px;margin-right:3px;" aria-hidden="true"></i>' + formatarLembrete(n.lembrete);
+      left.appendChild(lem);
+    }
+    if (n.anexos && n.anexos.length>0){
+      var anx = document.createElement('p');
+      anx.style.cssText = 'font-size:11px;color:var(--text-secondary);margin-top:4px;';
+      anx.innerHTML = '<i class="ti ti-paperclip" style="font-size:12px;vertical-align:-1px;margin-right:3px;" aria-hidden="true"></i>' + n.anexos.length + (n.anexos.length===1?' anexo':' anexos');
+      left.appendChild(anx);
+    }
+
+    var right = document.createElement('div');
+    right.style.cssText = 'display:flex;align-items:center;gap:2px;flex-shrink:0;';
+    var trashBtn = document.createElement('button');
+    trashBtn.type = 'button';
+    trashBtn.setAttribute('aria-label', 'Excluir nota ' + n.titulo);
+    trashBtn.style.cssText = 'border:none;background:transparent;padding:4px;color:var(--text-secondary);';
+    trashBtn.innerHTML = '<i class="ti ti-trash" style="font-size:15px;" aria-hidden="true"></i>';
+    trashBtn.addEventListener('click', (function(index){
+      return function(e){
+        e.stopPropagation();
+        confirmandoExclusaoIndex = index;
+        renderNotas();
+      };
+    })(i));
+    var icon = document.createElement('i');
+    icon.className = 'ti ti-chevron-right';
+    icon.style.cssText = 'font-size:16px;color:var(--text-muted);margin-left:2px;';
+    icon.setAttribute('aria-hidden','true');
+    right.appendChild(trashBtn);
+    right.appendChild(icon);
+
+    div.appendChild(left); div.appendChild(right);
+    lista.appendChild(div);
+  });
+}
+function limparCamposForm(){
+  document.getElementById('nota-titulo').value='';
+  document.getElementById('nota-cliente').value='';
+  document.getElementById('nota-texto').value='';
+  document.getElementById('nota-status').value='pendente';
+  document.getElementById('nota-lembrete-ativo').checked=false;
+  document.getElementById('nota-lembrete-data').value='';
+  document.getElementById('nota-lembrete-hora').value='09:00';
+  document.getElementById('nota-lembrete-email').value='';
+  document.getElementById('lembrete-campos').style.display='none';
+  document.getElementById('nota-anexos').value='';
+  formAnexos = [];
+  renderAnexosForm();
+}
+function mostrarListaPrincipal(){
+  document.getElementById('notas-header').style.display='flex';
+  document.getElementById('notas-lista').style.display='flex';
+  document.getElementById('nota-form').style.display='none';
+  document.getElementById('nota-detalhe').style.display='none';
+}
+function abrirNovaNota(){
+  notaEditandoIndex = null;
+  limparCamposForm();
+  document.getElementById('nota-form-titulo').textContent = 'Nova nota';
+  document.getElementById('notas-header').style.display='flex';
+  document.getElementById('notas-lista').style.display='flex';
+  document.getElementById('nota-detalhe').style.display='none';
+  document.getElementById('nota-form').style.display='block';
+}
+function cancelarForm(){
+  notaEditandoIndex = null;
+  mostrarListaPrincipal();
+}
+async function salvarNota(){
+  var titulo = document.getElementById('nota-titulo').value || 'Sem título';
+  var cliente = document.getElementById('nota-cliente').value || 'Cliente não informado';
+  var texto = document.getElementById('nota-texto').value || '';
+  var status = document.getElementById('nota-status').value || 'pendente';
+  var lembreteAtivo = document.getElementById('nota-lembrete-ativo').checked;
+  var lembrete = null;
+  if (lembreteAtivo){
+    var data = document.getElementById('nota-lembrete-data').value;
+    var hora = document.getElementById('nota-lembrete-hora').value || '09:00';
+    var email = document.getElementById('nota-lembrete-email').value || '';
+    if (data) lembrete = {data:data, hora:hora, email:email, sincronizado:false, eventoId:null};
+  }
+  var anexosFinal = formAnexos.map(function(a){ return a.name; });
+
+  var index;
+  if (notaEditandoIndex !== null){
+    NOTAS[notaEditandoIndex] = {titulo:titulo, cliente:cliente, texto:texto, status:status, lembrete:lembrete, anexos:anexosFinal};
+    index = notaEditandoIndex;
+  } else {
+    NOTAS.unshift({titulo:titulo, cliente:cliente, texto:texto, status:status, lembrete:lembrete, anexos:anexosFinal});
+    index = 0;
+  }
+  notaEditandoIndex = null;
+  limparCamposForm();
+  salvarNotasStorage();
+  renderNotas();
+  mostrarListaPrincipal();
+
+  if (lembrete) {
+    var ok = await sincronizarLembreteGoogle(NOTAS[index], false);
+    if (ok) { salvarNotasStorage(); renderNotas(); }
+  }
+}
+function editarNota(){
+  var n = NOTAS[notaAtualIndex];
+  notaEditandoIndex = notaAtualIndex;
+  document.getElementById('nota-titulo').value = n.titulo;
+  document.getElementById('nota-cliente').value = n.cliente;
+  document.getElementById('nota-texto').value = n.texto;
+  document.getElementById('nota-status').value = n.status || 'pendente';
+  if (n.lembrete){
+    document.getElementById('nota-lembrete-ativo').checked = true;
+    document.getElementById('nota-lembrete-data').value = n.lembrete.data;
+    document.getElementById('nota-lembrete-hora').value = n.lembrete.hora;
+    document.getElementById('nota-lembrete-email').value = n.lembrete.email || '';
+    document.getElementById('lembrete-campos').style.display = 'block';
+  } else {
+    document.getElementById('nota-lembrete-ativo').checked = false;
+    document.getElementById('lembrete-campos').style.display = 'none';
+  }
+  document.getElementById('nota-anexos').value = '';
+  formAnexos = (n.anexos || []).map(function(nome){ return {name:nome}; });
+  renderAnexosForm();
+  document.getElementById('nota-form-titulo').textContent = 'Editar nota';
+  document.getElementById('notas-header').style.display='none';
+  document.getElementById('notas-lista').style.display='none';
+  document.getElementById('nota-detalhe').style.display='none';
+  document.getElementById('nota-form').style.display='block';
+}
+function abrirDetalhe(i){
+  notaAtualIndex = i;
+  var n = NOTAS[i];
+  document.getElementById('detalhe-titulo').textContent = n.titulo;
+  document.getElementById('detalhe-cliente').textContent = n.cliente;
+  document.getElementById('detalhe-texto').textContent = n.texto;
+
+  var info = statusInfo(n.status || 'pendente');
+  var badge = document.getElementById('detalhe-status-badge');
+  badge.textContent = info.label;
+  badge.style.background = info.bg;
+  badge.style.color = info.color;
+  document.getElementById('detalhe-status-btn').textContent = info.actionLabel;
+
+  var lemBox = document.getElementById('detalhe-lembrete');
+  var lemSyncBtn = document.getElementById('detalhe-lembrete-sync-btn');
+  if (n.lembrete){
+    document.getElementById('detalhe-lembrete-data').textContent = formatarLembrete(n.lembrete);
+    var elSync = document.getElementById('detalhe-lembrete-sync');
+    if (n.lembrete.sincronizado) {
+      elSync.textContent = 'Sincronizado com Google Agenda' + (n.lembrete.email ? ' · convite enviado para ' + n.lembrete.email : '');
+      elSync.style.color = 'var(--text-accent)';
+      lemSyncBtn.style.display = 'none';
+    } else if (GOOGLE_CALENDAR_CONFIGURADO) {
+      elSync.textContent = 'Ainda não sincronizado com o Google Agenda.';
+      elSync.style.color = 'var(--text-warning)';
+      lemSyncBtn.style.display = 'inline-block';
+    } else {
+      elSync.textContent = 'Sincronização com Google Agenda não configurada ainda.';
+      elSync.style.color = 'var(--text-secondary)';
+      lemSyncBtn.style.display = 'none';
+    }
+    lemBox.style.display = 'block';
+  } else {
+    lemBox.style.display = 'none';
+  }
+
+  var anexosBox = document.getElementById('detalhe-anexos');
+  var anexosLista = document.getElementById('detalhe-anexos-lista');
+  anexosLista.innerHTML = '';
+  if (n.anexos && n.anexos.length>0){
+    n.anexos.forEach(function(nome){
+      var p = document.createElement('p');
+      p.style.cssText = 'font-size:12px;';
+      p.innerHTML = '<i class="ti ti-paperclip" style="font-size:13px;vertical-align:-1px;margin-right:4px;color:var(--text-secondary);" aria-hidden="true"></i>' + nome;
+      anexosLista.appendChild(p);
+    });
+    anexosBox.style.display = 'block';
+  } else {
+    anexosBox.style.display = 'none';
+  }
+
+  document.getElementById('notas-header').style.display='none';
+  document.getElementById('notas-lista').style.display='none';
+  document.getElementById('nota-form').style.display='none';
+  document.getElementById('nota-detalhe').style.display='block';
+}
+function alternarStatus(){
+  var n = NOTAS[notaAtualIndex];
+  n.status = (n.status === 'concluida') ? 'pendente' : 'concluida';
+  salvarNotasStorage();
+  abrirDetalhe(notaAtualIndex);
+  renderNotas();
+}
+function fecharDetalhe(){
+  mostrarListaPrincipal();
+}
+
+/* ---- Inicialização ---- */
+renderProduto();
+renderRecentes();
+carregarConfigStorage();
+calc();
+calcBonus();
+calcSimulador();
+calcSellOut();
+renderNotas();
+setModoLogin('entrar');
+atualizarIconeUsuario();
+var elAvisoConfig = document.getElementById('login-config-aviso');
+if (elAvisoConfig) elAvisoConfig.style.display = FIREBASE_CONFIGURADO ? 'none' : 'flex';
+show('buscar');
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.protocol === 'http:')) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>

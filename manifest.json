@@ -1,0 +1,19 @@
+{
+  "name": "Negocia AI",
+  "short_name": "Negocia AI",
+  "description": "Copiloto comercial para negociação em campo: preços, bonificações, margem/markup e notas de clientes.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f4f2",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
