@@ -1666,7 +1666,6 @@ function renderEstabelecimentosProximos(itens){
 var OSM_ESPELHOS = [
   'https://overpass-api.de/api/interpreter',
   'https://lz4.overpass-api.de/api/interpreter',
-  'https://overpass.osm.ch/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter'
 ];
@@ -1685,16 +1684,36 @@ async function obterItensOSM(lat, lon, raioKm){
   var raioMetros = Math.round(raioKm * 1000);
   var query = '[out:json][timeout:20];(node["shop"](around:' + raioMetros + ',' + lat + ',' + lon + ');way["shop"](around:' + raioMetros + ',' + lat + ',' + lon + '););out center tags;';
   // Consulta vários espelhos públicos do OSM em paralelo (o serviço gratuito
-  // é instável) e usa o primeiro que responder — em vez de esperar um por
-  // um, o que deixaria a busca muito lenta quando algum está fora do ar.
-  var json = null;
-  try {
-    json = await Promise.any(OSM_ESPELHOS.map(function(url){
-      return buscarUmEspelho(url, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 12000);
-    }));
-  } catch (e) {
-    throw new Error('todos os espelhos do OSM falharam');
-  }
+  // é instável). Alguns espelhos às vezes respondem rápido só que "vazios"
+  // (200 OK sem nenhum resultado, mesmo tendo lojas na área) — por isso não
+  // basta pegar o primeiro que responder: aceitamos na hora qualquer espelho
+  // que já trouxe resultados reais, mas só aceitamos uma resposta vazia se
+  // TODOS os espelhos concordarem que não há nada (aí sim é provável que a
+  // área realmente não tenha lojas cadastradas no raio escolhido).
+  var pendentes = OSM_ESPELHOS.map(function(url){
+    return buscarUmEspelho(url, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 10000)
+      .then(function(resultado){ return { ok: true, elementos: (resultado && resultado.elements) || [] }; })
+      .catch(function(){ return { ok: false, elementos: [] }; });
+  });
+  var elementos = await new Promise(function(resolve, reject){
+    var restantes = pendentes.length;
+    var melhorVazio = null;
+    pendentes.forEach(function(p){
+      p.then(function(r){
+        restantes--;
+        if (r.ok && r.elementos.length > 0) {
+          resolve(r.elementos);
+          return;
+        }
+        if (r.ok) melhorVazio = r.elementos;
+        if (restantes === 0) {
+          if (melhorVazio) resolve(melhorVazio);
+          else reject(new Error('todos os espelhos do OSM falharam'));
+        }
+      });
+    });
+  });
+  var json = { elements: elementos };
   var tiposRelevantes = ['supermarket', 'convenience', 'grocery', 'department_store', 'general', 'kiosk', 'wholesale', 'mall', 'variety_store', 'beverages', 'alcohol', 'bakery'];
   var itens = (json.elements || []).map(function(el){
     var tags = el.tags || {};
