@@ -1538,31 +1538,17 @@ function buscarPrecosComIA(){
   navigator.geolocation.getCurrentPosition(async function(pos){
     var lat = pos.coords.latitude;
     var lon = pos.coords.longitude;
-    mostrarStatusPrecosIA('Procurando estabelecimentos por perto...');
-    var itens;
-    try {
-      itens = await obterItensOSM(lat, lon, raioKm);
-    } catch (e) {
-      mostrarStatusPrecosIA('Não foi possível buscar estabelecimentos agora (serviço público pode estar sobrecarregado). Tente novamente.', true);
-      return;
-    }
-    if (itens.length === 0) {
-      mostrarStatusPrecosIA('Nenhum estabelecimento encontrado num raio de ' + raioKm + ' km. Tente aumentar o raio.', true);
-      return;
-    }
-    // Não exige mais que o OpenStreetMap já tenha o site cadastrado (a maioria
-    // dos estabelecimentos não tem essa informação preenchida lá) — manda os
-    // nomes/endereços e deixa a IA achar e conferir o site oficial de cada um.
-    var candidatos = itens.slice(0, 12);
-    mostrarStatusPrecosIA('Verificando o preço em ' + candidatos.length + ' estabelecimento' + (candidatos.length > 1 ? 's' : '') + ' próximo' + (candidatos.length > 1 ? 's' : '') + '...');
+    // A busca de estabelecimentos agora é feita pelo próprio servidor, usando
+    // o Google Places (mais confiável que o serviço gratuito usado antes).
+    mostrarStatusPrecosIA('Procurando estabelecimentos e verificando preços...');
     try {
       var resp = await fetch(PRECOS_IA_WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Negocia-Key': PRECOS_IA_CHAVE_APP },
         body: JSON.stringify({
-          estabelecimentos: candidatos.map(function(it){
-            return { nome: it.nome, website: it.website || null, endereco: it.endereco || null, distanciaKm: it.distanciaKm };
-          }),
+          lat: lat,
+          lon: lon,
+          raioKm: raioKm,
           produto: PRODUTO_ATUAL ? PRODUTO_ATUAL.nome : ''
         })
       });
@@ -1572,8 +1558,13 @@ function buscarPrecosComIA(){
         return;
       }
       esconderStatusPrecosIA();
+      var totalEstab = json.totalEstabelecimentos || 0;
+      if (totalEstab === 0) {
+        mostrarStatusPrecosIA('Nenhum estabelecimento encontrado num raio de ' + raioKm + ' km. Tente aumentar o raio.', true);
+        return;
+      }
       if (!json.resultados || json.resultados.length === 0) {
-        mostrarStatusPrecosIA('Verificamos ' + candidatos.length + ' estabelecimento' + (candidatos.length > 1 ? 's' : '') + ' próximo' + (candidatos.length > 1 ? 's' : '') + ' e nenhum tem esse produto com preço divulgado num site oficial.' + (json.observacao ? (' ' + json.observacao) : ''), true);
+        mostrarStatusPrecosIA('Verificamos ' + totalEstab + ' estabelecimento' + (totalEstab > 1 ? 's' : '') + ' próximo' + (totalEstab > 1 ? 's' : '') + ' e nenhum tem esse produto com preço divulgado num site oficial.' + (json.observacao ? (' ' + json.observacao) : ''), true);
         return;
       }
       renderPrecosIA(json.resultados, json.observacao, json.fontes);
@@ -1582,183 +1573,6 @@ function buscarPrecosComIA(){
     }
   }, function(){
     mostrarStatusPrecosIA('Não conseguimos acessar sua localização. Verifique a permissão do navegador (e que o app está sendo acessado por HTTPS).', true);
-  }, { enableHighAccuracy: true, timeout: 12000 });
-}
-
-/* ---- Estabelecimentos próximos (geolocalização + OpenStreetMap) ---- */
-function calcularDistanciaKm(lat1, lon1, lat2, lon2){
-  var R = 6371;
-  var dLat = (lat2 - lat1) * Math.PI / 180;
-  var dLon = (lon2 - lon1) * Math.PI / 180;
-  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-function mostrarStatusRegiao(msg, erro){
-  var el = document.getElementById('regiao-status');
-  if (!el) return;
-  el.style.display = 'block';
-  el.textContent = msg;
-  el.style.color = erro ? 'var(--text-danger)' : 'var(--text-secondary)';
-}
-function esconderStatusRegiao(){
-  var el = document.getElementById('regiao-status');
-  if (el) el.style.display = 'none';
-}
-function esconderResultadosRegiao(){
-  var el = document.getElementById('regiao-resultados');
-  if (el) { el.style.display = 'none'; el.innerHTML = ''; }
-}
-function renderEstabelecimentosProximos(itens){
-  var el = document.getElementById('regiao-resultados');
-  if (!el) return;
-  el.innerHTML = '';
-  el.style.display = 'flex';
-  itens.forEach(function(it){
-    var div = document.createElement('div');
-    div.style.cssText = 'border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;';
-
-    var linha1 = document.createElement('div');
-    linha1.style.cssText = 'display:flex;justify-content:space-between;align-items:baseline;gap:8px;';
-    var nome = document.createElement('span');
-    nome.style.cssText = 'font-size:14px;font-weight:500;';
-    nome.textContent = it.nome;
-    var dist = document.createElement('span');
-    dist.style.cssText = 'font-size:12px;color:var(--text-secondary);flex-shrink:0;';
-    dist.textContent = it.distanciaKm < 1 ? Math.round(it.distanciaKm * 1000) + ' m' : it.distanciaKm.toFixed(1).replace('.', ',') + ' km';
-    linha1.appendChild(nome);
-    linha1.appendChild(dist);
-    div.appendChild(linha1);
-
-    if (it.endereco) {
-      var end = document.createElement('p');
-      end.style.cssText = 'font-size:12px;color:var(--text-secondary);margin-top:2px;';
-      end.textContent = it.endereco;
-      div.appendChild(end);
-    }
-
-    var acoes = document.createElement('div');
-    acoes.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;';
-    var buscaUrl = 'https://www.google.com/search?q=' + encodeURIComponent(it.nome + ' ' + (PRODUTO_ATUAL ? PRODUTO_ATUAL.nome : '') + ' preço');
-    var btnBusca = document.createElement('a');
-    btnBusca.href = buscaUrl;
-    btnBusca.target = '_blank';
-    btnBusca.rel = 'noopener noreferrer';
-    btnBusca.textContent = 'Conferir preço';
-    btnBusca.style.cssText = 'font-size:11px;padding:5px 10px;border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text-accent);text-decoration:none;';
-    acoes.appendChild(btnBusca);
-    if (it.website) {
-      var siteUrl = it.website.indexOf('http') === 0 ? it.website : ('https://' + it.website);
-      var btnSite = document.createElement('a');
-      btnSite.href = siteUrl;
-      btnSite.target = '_blank';
-      btnSite.rel = 'noopener noreferrer';
-      btnSite.textContent = 'Site da loja';
-      btnSite.style.cssText = 'font-size:11px;padding:5px 10px;border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text-secondary);text-decoration:none;';
-      acoes.appendChild(btnSite);
-    }
-    div.appendChild(acoes);
-    el.appendChild(div);
-  });
-}
-var OSM_ESPELHOS = [
-  'https://overpass-api.de/api/interpreter',
-  'https://lz4.overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.private.coffee/api/interpreter'
-];
-async function buscarUmEspelho(url, opcoes, ms){
-  var ctrl = new AbortController();
-  var timer = setTimeout(function(){ ctrl.abort(); }, ms);
-  try {
-    var resp = await fetch(url, Object.assign({}, opcoes, { signal: ctrl.signal }));
-    if (!resp.ok) throw new Error('overpass falhou (status ' + resp.status + ')');
-    return await resp.json();
-  } finally {
-    clearTimeout(timer);
-  }
-}
-async function obterItensOSM(lat, lon, raioKm){
-  var raioMetros = Math.round(raioKm * 1000);
-  var query = '[out:json][timeout:20];(node["shop"](around:' + raioMetros + ',' + lat + ',' + lon + ');way["shop"](around:' + raioMetros + ',' + lat + ',' + lon + '););out center tags;';
-  // Consulta vários espelhos públicos do OSM em paralelo (o serviço gratuito
-  // é instável). Alguns espelhos às vezes respondem rápido só que "vazios"
-  // (200 OK sem nenhum resultado, mesmo tendo lojas na área) — por isso não
-  // basta pegar o primeiro que responder: aceitamos na hora qualquer espelho
-  // que já trouxe resultados reais, mas só aceitamos uma resposta vazia se
-  // TODOS os espelhos concordarem que não há nada (aí sim é provável que a
-  // área realmente não tenha lojas cadastradas no raio escolhido).
-  var pendentes = OSM_ESPELHOS.map(function(url){
-    return buscarUmEspelho(url, { method: 'POST', body: 'data=' + encodeURIComponent(query) }, 10000)
-      .then(function(resultado){ return { ok: true, elementos: (resultado && resultado.elements) || [] }; })
-      .catch(function(){ return { ok: false, elementos: [] }; });
-  });
-  var elementos = await new Promise(function(resolve, reject){
-    var restantes = pendentes.length;
-    var melhorVazio = null;
-    pendentes.forEach(function(p){
-      p.then(function(r){
-        restantes--;
-        if (r.ok && r.elementos.length > 0) {
-          resolve(r.elementos);
-          return;
-        }
-        if (r.ok) melhorVazio = r.elementos;
-        if (restantes === 0) {
-          if (melhorVazio) resolve(melhorVazio);
-          else reject(new Error('todos os espelhos do OSM falharam'));
-        }
-      });
-    });
-  });
-  var json = { elements: elementos };
-  var tiposRelevantes = ['supermarket', 'convenience', 'grocery', 'department_store', 'general', 'kiosk', 'wholesale', 'mall', 'variety_store', 'beverages', 'alcohol', 'bakery'];
-  var itens = (json.elements || []).map(function(el){
-    var tags = el.tags || {};
-    var elLat = el.lat || (el.center && el.center.lat);
-    var elLon = el.lon || (el.center && el.center.lon);
-    if (!elLat || !elLon || !tags.name) return null;
-    return {
-      nome: tags.name,
-      tipo: tags.shop,
-      endereco: [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(', ') || null,
-      website: tags.website || tags['contact:website'] || null,
-      distanciaKm: calcularDistanciaKm(lat, lon, elLat, elLon)
-    };
-  }).filter(function(x){ return x && tiposRelevantes.indexOf(x.tipo) !== -1; });
-  itens.sort(function(a, b){ return a.distanciaKm - b.distanciaKm; });
-  return itens.slice(0, 20);
-}
-function buscarEstabelecimentosProximos(){
-  var raioInput = document.getElementById('raio-km');
-  var raioKm = parseFloat(raioInput.value) || 3;
-  if (raioKm > 20) { raioKm = 20; raioInput.value = 20; }
-  if (raioKm < 0.5) { raioKm = 0.5; raioInput.value = 0.5; }
-
-  esconderResultadosRegiao();
-  if (!navigator.geolocation) {
-    mostrarStatusRegiao('Geolocalização não é suportada neste navegador.', true);
-    return;
-  }
-  mostrarStatusRegiao('Obtendo sua localização...');
-  navigator.geolocation.getCurrentPosition(function(pos){
-    var lat = pos.coords.latitude;
-    var lon = pos.coords.longitude;
-    mostrarStatusRegiao('Buscando estabelecimentos num raio de ' + raioKm + ' km...');
-    obterItensOSM(lat, lon, raioKm).then(function(itens){
-      esconderStatusRegiao();
-      if (itens.length === 0) {
-        mostrarStatusRegiao('Nenhum estabelecimento encontrado nesse raio. Tente aumentar a distância.', true);
-        return;
-      }
-      renderEstabelecimentosProximos(itens);
-    }).catch(function(){
-      mostrarStatusRegiao('Não foi possível buscar agora (o serviço público do OpenStreetMap pode estar sobrecarregado). Tente novamente em instantes.', true);
-    });
-  }, function(){
-    mostrarStatusRegiao('Não conseguimos acessar sua localização. Verifique a permissão do navegador (e que o app está sendo acessado por HTTPS).', true);
   }, { enableHighAccuracy: true, timeout: 12000 });
 }
 
