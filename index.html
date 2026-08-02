@@ -1549,7 +1549,9 @@ function buscarPrecosComIA(){
           lat: lat,
           lon: lon,
           raioKm: raioKm,
-          produto: PRODUTO_ATUAL ? PRODUTO_ATUAL.nome : ''
+          produto: PRODUTO_ATUAL ? PRODUTO_ATUAL.nome : '',
+          marca: PRODUTO_ATUAL ? PRODUTO_ATUAL.marca : '',
+          embalagem: PRODUTO_ATUAL ? PRODUTO_ATUAL.embalagem : ''
         })
       });
       var json = await resp.json();
