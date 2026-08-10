@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ç<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
@@ -339,24 +339,7 @@
     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-top:4px;"><span>Custo efetivo/caixa</span><span id="b-custocx"></span></div>
   </div>
 
-    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Preços sugeridos com base no custo efetivo</p>
-    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
-      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;">
-        <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;">Preço baixo</span><span id="b-p-baixo" style="font-size:13px;font-weight:500;"></span></div>
-        <p id="b-m-baixo" style="font-size:11px;color:var(--text-secondary);margin-top:2px;"></p>
-      </div>
-      <div style="border:2px solid var(--border-accent);border-radius:var(--radius);padding:8px 10px;">
-        <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;">Preço competitivo</span><span id="b-p-comp" style="font-size:13px;font-weight:500;"></span></div>
-        <p id="b-m-comp" style="font-size:11px;color:var(--text-secondary);margin-top:2px;"></p>
-      </div>
-      <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;">
-        <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;">Preço alto</span><span id="b-p-alto" style="font-size:13px;font-weight:500;"></span></div>
-        <p id="b-m-alto" style="font-size:11px;color:var(--text-secondary);margin-top:2px;"></p>
-      </div>
-    </div>
-    <p style="font-size:11px;color:var(--text-muted);">Acima: efeito da promoção no seu custo. Abaixo: quanto bonificar para chegar no custo que você quer praticar.</p>
-  </div>
-
+    
   <button type="button" onclick="toggleSecaoCustoPraticar()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface-1);border-radius:var(--radius);margin-bottom:8px;">
     <span style="font-size:13px;font-weight:500;">Custo a praticar</span>
     <i id="icon-secao-custopraticar" class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
@@ -1228,14 +1211,7 @@ function calcBonus(){
   document.getElementById('b-custoun').textContent = fmt(custoEfetivoUnidade);
   document.getElementById('b-custocx').textContent = fmt(custoEfetivoUnidade*unid);
 
-  var precos = getPrecos();
-  document.getElementById('b-p-baixo').textContent = fmt(precos.baixo);
-  document.getElementById('b-p-comp').textContent = fmt(precos.comp);
-  document.getElementById('b-p-alto').textContent = fmt(precos.alto);
-  document.getElementById('b-m-baixo').textContent = margemMarkup(precos.baixo, custoEfetivoUnidade);
-  document.getElementById('b-m-comp').textContent = margemMarkup(precos.comp, custoEfetivoUnidade);
-  document.getElementById('b-m-alto').textContent = margemMarkup(precos.alto, custoEfetivoUnidade);
-
+  
   var unidadesPedidas = caixas*unid;
   var bonusUnidadesNecessarias = custoPraticar>0
     ? Math.max(unidadesPedidas*(custo-custoPraticar)/custoPraticar, 0)
