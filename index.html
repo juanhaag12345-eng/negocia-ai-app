@@ -359,6 +359,26 @@
         <p id="b-sugestao" style="font-size:15px;font-weight:500;margin-top:2px;"></p>
       </div>
     </div>
+          <div style="margin-top:14px;border-top:0.5px solid var(--border);padding-top:12px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
+          <input type="checkbox" id="bonus-simular-pedido" onchange="toggleSimularPedidoBonus()" style="width:auto;" />Simular um pedido
+        </label>
+        <div id="bonus-pedido-campos" style="display:none;">
+          <label style="font-size:12px;color:var(--text-secondary);">Cliente</label>
+          <input type="text" id="bonus-pedido-cliente" placeholder="Ex: Mercado Bom Preço" style="margin-bottom:8px;" />
+          <label style="font-size:12px;color:var(--text-secondary);">Descrição do produto</label>
+          <input type="text" id="bonus-pedido-descricao" placeholder="Ex: Nutella 140g" style="margin-bottom:8px;" />
+          <label style="font-size:12px;color:var(--text-secondary);">Preço a ser vendido</label>
+          <input type="number" id="bonus-pedido-preco" step="0.01" placeholder="Ex: 12.90" style="margin-bottom:8px;" />
+          <label style="font-size:12px;color:var(--text-secondary);">Custo usado no valor final do pedido</label>
+          <select id="bonus-pedido-custobase" style="margin-bottom:10px;">
+            <option value="inicial">Custo inicial</option>
+            <option value="abatimento">Custo com abatimento (bonificação)</option>
+          </select>
+          <p id="bonus-pedido-msg" style="display:none;font-size:12px;color:var(--text-success);margin-bottom:8px;"></p>
+          <button type="button" onclick="adicionarPedidoBonus()" style="width:100%;">Adicionar ao pedido</button>
+        </div>
+      </div>
   </div>
 </div>
 
@@ -492,9 +512,33 @@
       <span style="color:var(--text-success);font-weight:500;">Margem contrib. final</span><span id="so-margemfinal" style="font-weight:500;color:var(--text-success);"></span>
     </div>
   </div>
+        <div style="margin-top:14px;border-top:0.5px solid var(--border);padding-top:12px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
+          <input type="checkbox" id="sellout-simular-pedido" onchange="toggleSimularPedidoSellout()" style="width:auto;" />Simular um pedido
+        </label>
+        <div id="sellout-pedido-campos" style="display:none;">
+          <label style="font-size:12px;color:var(--text-secondary);">Cliente</label>
+          <input type="text" id="sellout-pedido-cliente" placeholder="Ex: Mercado Bom Preço" style="margin-bottom:8px;" />
+          <label style="font-size:12px;color:var(--text-secondary);">Descrição do produto</label>
+          <input type="text" id="sellout-pedido-descricao" placeholder="Ex: Nutella 140g" style="margin-bottom:8px;" />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div><label style="font-size:12px;color:var(--text-secondary);">Qtd. caixas</label><input type="number" id="sellout-pedido-caixas" step="1" placeholder="Ex: 10" /></div>
+            <div><label style="font-size:12px;color:var(--text-secondary);">Unid. por caixa</label><input type="number" id="sellout-pedido-unidcaixa" step="1" placeholder="Ex: 12" /></div>
+          </div>
+          <p id="sellout-pedido-msg" style="display:none;font-size:12px;color:var(--text-success);margin-bottom:8px;"></p>
+          <button type="button" onclick="adicionarPedidoSellout()" style="width:100%;">Adicionar ao pedido</button>
+        </div>
+      </div>
 </div>
 
-<div id="screen-notas" style="padding:16px;flex:1;display:none;">
+  <div id="screen-pedidos" style="padding:16px;flex:1;display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-weight:500;font-size:15px;">Pedidos</span>
+    </div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Produtos adicionados pela Bonificação e pelo Sell Out, agrupados por cliente.</p>
+    <div id="pedidos-lista"></div>
+  </div>
+  <div id="screen-notas" style="padding:16px;flex:1;display:none;">
   <div id="notas-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
     <span style="font-weight:500;font-size:15px;">Minhas notas</span>
     <button type="button" onclick="abrirNovaNota()" style="padding:6px 10px;font-size:12px;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>Nova</button>
@@ -574,6 +618,7 @@
 <div class="bottom-nav">
   <button type="button" onclick="show('calculadoras')" id="nav-calculadoras" class="nav-btn"><i class="ti ti-calculator" style="font-size:21px;" aria-hidden="true"></i>Calc.</button>
   <button type="button" onclick="show('notas')" id="nav-notas" class="nav-btn"><i class="ti ti-notes" style="font-size:21px;" aria-hidden="true"></i>Notas</button>
+    <button type="button" onclick="show('pedidos')" id="nav-pedidos" class="nav-btn"><i class="ti ti-clipboard-list" style="font-size:21px;" aria-hidden="true"></i>Pedidos</button>
 </div>
 
 </div>
@@ -703,9 +748,270 @@ var notaAtualIndex = null;
 var formAnexos = [];
 var confirmandoExclusaoIndex = null;
 
-var TODAS_TELAS = ['login','calculadoras','bonus','simulador','sellout','notas'];
-var NAV_MAP = { calculadoras:'nav-calculadoras', bonus:'nav-calculadoras', simulador:'nav-calculadoras', sellout:'nav-calculadoras', notas:'nav-notas' };
+var TODAS_TELAS = ['login','calculadoras','bonus','simulador','sellout','notas','pedidos'];
+var NAV_MAP = { calculadoras:'nav-calculadoras', bonus:'nav-calculadoras', simulador:'nav-calculadoras', sellout:'nav-calculadoras', notas:'nav-notas', pedidos:'nav-pedidos' };
   
+var PEDIDOS = [];
+try {
+  var _storedPedidos = localStorage.getItem('negocia_pedidos');
+  if (_storedPedidos) { PEDIDOS = JSON.parse(_storedPedidos); }
+} catch (e) {}
+var PEDIDO_EDITANDO_ID = null;
+
+function salvarPedidosStorage(){
+  try { localStorage.setItem('negocia_pedidos', JSON.stringify(PEDIDOS)); } catch (e) {}
+}
+
+function escapeHtml(str){
+  return String(str==null?'':str).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function toggleSimularPedidoBonus(){
+  var d = document.getElementById('bonus-pedido-campos');
+  d.style.display = document.getElementById('bonus-simular-pedido').checked ? 'block' : 'none';
+}
+function toggleSimularPedidoSellout(){
+  var d = document.getElementById('sellout-pedido-campos');
+  d.style.display = document.getElementById('sellout-simular-pedido').checked ? 'block' : 'none';
+}
+
+function adicionarPedidoBonus(){
+  var cliente = (document.getElementById('bonus-pedido-cliente').value || '').trim();
+  var descricao = (document.getElementById('bonus-pedido-descricao').value || '').trim();
+  var preco = parseFloat(document.getElementById('bonus-pedido-preco').value) || 0;
+  var custoBase = document.getElementById('bonus-pedido-custobase').value;
+  if (!cliente || !descricao){
+    alert('Preencha o cliente e a descrição do produto.');
+    return;
+  }
+  PEDIDOS.push({
+    id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
+    origem: 'bonus',
+    cliente: cliente,
+    descricao: descricao,
+    criadoEm: Date.now(),
+    custo: parseFloat(document.getElementById('bcusto').value) || 0,
+    unid: parseFloat(document.getElementById('bunid').value) || 1,
+    caixas: parseFloat(document.getElementById('bcaixas').value) || 0,
+    compre: parseFloat(document.getElementById('bcompre').value) || 0,
+    ganhe: parseFloat(document.getElementById('bganhe').value) || 0,
+    investPct: parseFloat(document.getElementById('binvestpct').value) || 0,
+    preco: preco,
+    custoBase: custoBase
+  });
+  salvarPedidosStorage();
+  document.getElementById('bonus-pedido-descricao').value = '';
+  document.getElementById('bonus-pedido-preco').value = '';
+  var msg = document.getElementById('bonus-pedido-msg');
+  msg.textContent = 'Adicionado ao pedido de ' + cliente + '. Veja na aba Pedidos.';
+  msg.style.display = 'block';
+}
+
+function adicionarPedidoSellout(){
+  var cliente = (document.getElementById('sellout-pedido-cliente').value || '').trim();
+  var descricao = (document.getElementById('sellout-pedido-descricao').value || '').trim();
+  var caixas = parseFloat(document.getElementById('sellout-pedido-caixas').value) || 0;
+  var unidCaixa = parseFloat(document.getElementById('sellout-pedido-unidcaixa').value) || 1;
+  if (!cliente || !descricao){
+    alert('Preencha o cliente e a descrição do produto.');
+    return;
+  }
+  PEDIDOS.push({
+    id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
+    origem: 'sellout',
+    cliente: cliente,
+    descricao: descricao,
+    criadoEm: Date.now(),
+    custo: parseFloat(document.getElementById('so-custo').value) || 0,
+    preco: parseFloat(document.getElementById('so-preco').value) || 0,
+    margemObj: parseFloat(document.getElementById('so-margemobj').value) || 0,
+    caixas: caixas,
+    unidCaixa: unidCaixa
+  });
+  salvarPedidosStorage();
+  document.getElementById('sellout-pedido-descricao').value = '';
+  document.getElementById('sellout-pedido-caixas').value = '';
+  document.getElementById('sellout-pedido-unidcaixa').value = '';
+  var msg = document.getElementById('sellout-pedido-msg');
+  msg.textContent = 'Adicionado ao pedido de ' + cliente + '. Veja na aba Pedidos.';
+  msg.style.display = 'block';
+}
+
+function calcBonusItem(it){
+  var promoCompra = it.compre>0 ? Math.floor(it.caixas/it.compre)*it.ganhe : 0;
+  var promoPct = it.caixas*(it.investPct/100);
+  var promoTotal = promoCompra + promoPct;
+  var custoEfetivo = (it.caixas+promoTotal)>0 ? (it.caixas*it.custo)/(it.caixas+promoTotal) : it.custo;
+  var acao = [];
+  if (it.compre>0 && it.ganhe>0) acao.push('Compre ' + it.compre + ', ganhe ' + it.ganhe);
+  if (it.investPct>0) acao.push(String(it.investPct).replace('.', ',') + '% de investimento');
+  if (acao.length===0) acao.push('Sem promoção comercial');
+  var unidadesTotais = it.caixas*it.unid;
+  var custoUsado = it.custoBase==='abatimento' ? custoEfetivo : it.custo;
+  var valorTotalProduto = custoUsado*unidadesTotais;
+  var valorTotalAcao = promoTotal*it.unid*it.custo;
+  return {
+    custoEfetivo: custoEfetivo,
+    acaoTexto: acao.join(' + '),
+    unidadesTotais: unidadesTotais,
+    valorTotalProduto: valorTotalProduto,
+    valorTotalAcao: valorTotalAcao
+  };
+}
+
+function calcSelloutItem(it){
+  var kE = TAX.icmsEntrada + (1-TAX.icmsEntrada)*TAX.pcEntrada;
+  var kS = TAX.icmsSaida + (1-TAX.icmsSaida)*TAX.pcSaida;
+  var margemObjFrac = (it.margemObj||0)/100;
+  var custoAtualizado = it.preco>0 ? it.preco*(1-kS-margemObjFrac)/(1-kE) : 0;
+  custoAtualizado = Math.max(custoAtualizado, 0);
+  var investimento = Math.max(it.custo - custoAtualizado, 0);
+  var unidadesTotais = it.caixas*it.unidCaixa;
+  var valorTotalProduto = it.preco*unidadesTotais;
+  var valorTotalAcao = investimento*unidadesTotais;
+  var margem = it.preco>0 ? ((it.preco-it.custo)/it.preco*100) : 0;
+  var markup = it.custo>0 ? ((it.preco-it.custo)/it.custo*100) : 0;
+  var valorDiferenca = it.preco-it.custo;
+  return {
+    custoAtualizado: custoAtualizado,
+    investimento: investimento,
+    unidadesTotais: unidadesTotais,
+    valorTotalProduto: valorTotalProduto,
+    valorTotalAcao: valorTotalAcao,
+    margem: margem,
+    markup: markup,
+    valorDiferenca: valorDiferenca
+  };
+}
+
+function campoEditPedido(label, id, value, step){
+  var tipo = step ? 'number' : 'text';
+  return '<div style="margin-bottom:6px;"><label style="font-size:11px;color:var(--text-secondary);">' + label + '</label><input type="' + tipo + '" id="' + id + '" value="' + escapeHtml(value) + '"' + (step ? (' step="' + step + '"') : '') + ' style="padding:6px 8px;font-size:13px;"></div>';
+}
+
+function renderItemEditHtml(it){
+  var campos = '';
+  campos += campoEditPedido('Cliente', 'edit-cliente', it.cliente, null);
+  campos += campoEditPedido('Descrição do produto', 'edit-descricao', it.descricao, null);
+  if (it.origem==='bonus'){
+    campos += campoEditPedido('Custo/un.', 'edit-custo', it.custo, '0.01');
+    campos += campoEditPedido('Un. por caixa', 'edit-unid', it.unid, '1');
+    campos += campoEditPedido('Caixas do pedido', 'edit-caixas', it.caixas, '1');
+    campos += campoEditPedido('Compre (caixas)', 'edit-compre', it.compre, '1');
+    campos += campoEditPedido('Ganhe (caixas)', 'edit-ganhe', it.ganhe, '1');
+    campos += campoEditPedido('Investimento (%)', 'edit-investpct', it.investPct, '0.1');
+    campos += campoEditPedido('Preço a ser vendido', 'edit-preco', it.preco, '0.01');
+    campos += '<div style="margin-bottom:6px;"><label style="font-size:11px;color:var(--text-secondary);">Valor do pedido considerando</label><select id="edit-custobase" style="padding:6px 8px;font-size:13px;"><option value="abatimento"' + (it.custoBase==='abatimento' ? ' selected' : '') + '>Custo com abatimento</option><option value="inicial"' + (it.custoBase==='inicial' ? ' selected' : '') + '>Custo inicial</option></select></div>';
+  } else {
+    campos += campoEditPedido('Custo do produto', 'edit-custo', it.custo, '0.01');
+    campos += campoEditPedido('Preço promocional', 'edit-preco', it.preco, '0.01');
+    campos += campoEditPedido('Margem objetivo (%)', 'edit-margemobj', it.margemObj, '0.1');
+    campos += campoEditPedido('Caixas', 'edit-caixas', it.caixas, '1');
+    campos += campoEditPedido('Unidades por caixa', 'edit-unidcaixa', it.unidCaixa, '1');
+  }
+  return '<div style="padding:10px 12px;border-top:0.5px solid var(--border);background:var(--surface-1);">' + campos + '<div style="display:flex;gap:8px;margin-top:6px;"><button type="button" data-id="' + it.id + '" onclick="salvarEdicaoItemPedido(this.dataset.id)" style="flex:1;background:var(--text-accent);color:#fff;border:none;">Salvar</button><button type="button" onclick="cancelarEdicaoPedido()" style="flex:1;">Cancelar</button></div></div>';
+}
+
+function renderItemPedidoHtml(it, d){
+  if (PEDIDO_EDITANDO_ID === it.id){
+    return renderItemEditHtml(it);
+  }
+  var origemLabel = it.origem==='bonus' ? 'Bonificação' : 'Sell Out';
+  var linhas = '';
+  if (it.origem==='bonus'){
+    linhas =
+      '<div style="display:flex;justify-content:space-between;"><span>Preço fora de ação</span><span>' + fmt(it.preco) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Ação realizada</span><span style="text-align:right;">' + escapeHtml(d.acaoTexto) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Custo final do produto</span><span>' + fmt(d.custoEfetivo) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Valor do pedido (' + (it.custoBase==='abatimento' ? 'c/ abatimento' : 'custo inicial') + ')</span><span style="font-weight:500;">' + fmt(d.valorTotalProduto) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Valor investido na ação</span><span>' + fmt(d.valorTotalAcao) + '</span></div>';
+  } else {
+    linhas =
+      '<div style="display:flex;justify-content:space-between;"><span>Custo do produto</span><span>' + fmt(it.custo) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Preço promocional</span><span>' + fmt(it.preco) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Margem objetivo</span><span>' + (it.margemObj||0).toFixed(1).replace('.',',') + '%</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Margem</span><span>' + d.margem.toFixed(1).replace('.',',') + '% · ' + fmt(d.valorDiferenca) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Markup</span><span>' + d.markup.toFixed(1).replace('.',',') + '% · ' + fmt(d.valorDiferenca) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Valor do pedido</span><span style="font-weight:500;">' + fmt(d.valorTotalProduto) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Valor investido na ação</span><span>' + fmt(d.valorTotalAcao) + '</span></div>';
+  }
+  return '<div style="padding:10px 12px;border-top:0.5px solid var(--border);"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;"><div><p style="font-size:13px;font-weight:500;">' + escapeHtml(it.descricao) + '</p><p style="font-size:11px;color:var(--text-secondary);">' + origemLabel + '</p></div><div style="display:flex;gap:4px;flex-shrink:0;"><button type="button" data-id="' + it.id + '" onclick="editarItemPedido(this.dataset.id)" style="border:none;background:transparent;padding:4px;width:auto;font-size:12px;">Editar</button><button type="button" data-id="' + it.id + '" onclick="excluirItemPedido(this.dataset.id)" style="border:none;background:transparent;padding:4px;width:auto;font-size:12px;color:var(--text-danger);">Excluir</button></div></div><div style="margin-top:6px;font-size:12px;color:var(--text-secondary);">' + linhas + '</div></div>';
+}
+
+function renderPedidos(){
+  var container = document.getElementById('pedidos-lista');
+  if (!container) return;
+  if (PEDIDOS.length===0){
+    container.innerHTML = '<p style="font-size:13px;color:var(--text-secondary);text-align:center;padding:24px 0;">Nenhum pedido adicionado ainda. Use "Simular um pedido" na Bonificação ou no Sell Out.</p>';
+    return;
+  }
+  var porCliente = {};
+  var ordem = [];
+  PEDIDOS.forEach(function(it){
+    var c = it.cliente || 'Sem cliente';
+    if (!porCliente[c]){ porCliente[c] = []; ordem.push(c); }
+    porCliente[c].push(it);
+  });
+  var html = '';
+  ordem.forEach(function(cliente){
+    var itens = porCliente[cliente];
+    var totalProduto = 0, totalAcao = 0;
+    var itensHtml = '';
+    itens.forEach(function(it){
+      var d = it.origem==='bonus' ? calcBonusItem(it) : calcSelloutItem(it);
+      totalProduto += d.valorTotalProduto;
+      totalAcao += d.valorTotalAcao;
+      itensHtml += renderItemPedidoHtml(it, d);
+    });
+    html += '<div style="border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;"><div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface-1);"><span style="font-weight:500;font-size:14px;">' + escapeHtml(cliente) + '</span><button type="button" data-cliente="' + escapeHtml(cliente) + '" onclick="excluirPedidoCliente(this.dataset.cliente)" style="border:none;background:transparent;color:var(--text-danger);font-size:12px;padding:2px 6px;width:auto;">Excluir pedido</button></div>' + itensHtml + '<div style="display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;border-top:0.5px solid var(--border);background:var(--bg-accent);"><span>Total do pedido (produto)</span><span style="font-weight:500;">' + fmt(totalProduto) + '</span></div><div style="display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;"><span>Total investido em ação</span><span style="font-weight:500;">' + fmt(totalAcao) + '</span></div></div>';
+  });
+  container.innerHTML = html;
+}
+
+function editarItemPedido(id){ PEDIDO_EDITANDO_ID = id; renderPedidos(); }
+function cancelarEdicaoPedido(){ PEDIDO_EDITANDO_ID = null; renderPedidos(); }
+
+function salvarEdicaoItemPedido(id){
+  var it = null;
+  for (var i=0;i<PEDIDOS.length;i++){ if (PEDIDOS[i].id===id){ it = PEDIDOS[i]; break; } }
+  if (!it) return;
+  it.cliente = (document.getElementById('edit-cliente').value || '').trim();
+  it.descricao = (document.getElementById('edit-descricao').value || '').trim();
+  it.custo = parseFloat(document.getElementById('edit-custo').value) || 0;
+  it.preco = parseFloat(document.getElementById('edit-preco').value) || 0;
+  if (it.origem==='bonus'){
+    it.unid = parseFloat(document.getElementById('edit-unid').value) || 1;
+    it.caixas = parseFloat(document.getElementById('edit-caixas').value) || 0;
+    it.compre = parseFloat(document.getElementById('edit-compre').value) || 0;
+    it.ganhe = parseFloat(document.getElementById('edit-ganhe').value) || 0;
+    it.investPct = parseFloat(document.getElementById('edit-investpct').value) || 0;
+    it.custoBase = document.getElementById('edit-custobase').value;
+  } else {
+    it.margemObj = parseFloat(document.getElementById('edit-margemobj').value) || 0;
+    it.caixas = parseFloat(document.getElementById('edit-caixas').value) || 0;
+    it.unidCaixa = parseFloat(document.getElementById('edit-unidcaixa').value) || 1;
+  }
+  salvarPedidosStorage();
+  PEDIDO_EDITANDO_ID = null;
+  renderPedidos();
+}
+
+function excluirItemPedido(id){
+  if (!confirm('Remover este item do pedido?')) return;
+  PEDIDOS = PEDIDOS.filter(function(p){ return p.id!==id; });
+  salvarPedidosStorage();
+  renderPedidos();
+}
+
+function excluirPedidoCliente(cliente){
+  if (!confirm('Excluir todo o pedido de ' + cliente + '?')) return;
+  PEDIDOS = PEDIDOS.filter(function(p){ return p.cliente!==cliente; });
+  salvarPedidosStorage();
+  renderPedidos();
+}
+
 function selecionarProduto(key){
   selecionarProdutoObjeto(PRODUTOS[key]);
 }
@@ -1146,7 +1452,7 @@ function show(name){
   TODAS_TELAS.forEach(function(s){
     document.getElementById('screen-'+s).style.display = (s===name) ? 'block' : 'none';
   });
-  ['nav-buscar','nav-produto','nav-precos','nav-calculadoras','nav-notas'].forEach(function(id){
+        ['nav-buscar','nav-produto','nav-precos','nav-calculadoras','nav-notas','nav-pedidos'].forEach(function(id){
     var btn = document.getElementById(id);
     if (btn) btn.style.color = '';
   });
@@ -1848,6 +2154,7 @@ calcBonus();
 calcSimulador();
 calcSellOut();
 renderNotas();
+    renderPedidos();
 setModoLogin('entrar');
 atualizarIconeUsuario();
 var elAvisoConfig = document.getElementById('login-config-aviso');
