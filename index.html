@@ -280,57 +280,6 @@
   <p id="login-footer" style="text-align:center;font-size:12px;color:var(--text-secondary);">Ainda não tem conta? <button type="button" onclick="setModoLogin('criar')" style="border:none;background:transparent;padding:0;font-size:12px;color:var(--text-accent);font-weight:500;">Criar conta</button></p>
 </div>
 
-<div id="screen-buscar" style="padding:16px;flex:1;">
-  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Como você quer buscar o produto?</p>
-  <div style="display:flex;gap:6px;margin-bottom:8px;">
-    <input type="text" id="busca-texto" placeholder="Digite o nome ou marca" onkeydown="if(event.key==='Enter'){buscarProdutosPorTexto(this.value);}" />
-    <button type="button" onclick="buscarProdutosPorTexto(document.getElementById('busca-texto').value)" style="flex-shrink:0;padding:9px 12px;" aria-label="Buscar"><i class="ti ti-search" style="font-size:16px;" aria-hidden="true"></i></button>
-  </div>
-  <p id="busca-status" style="display:none;font-size:12px;margin-bottom:10px;"></p>
-  <div id="busca-resultados" style="display:none;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
-  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px;">
-    <button type="button" onclick="abrirScannerCodigoBarras()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;"><i class="ti ti-barcode" style="font-size:22px;color:var(--text-accent);" aria-hidden="true"></i>Código de barras</button>
-    <button type="button" onclick="document.getElementById('foto-input').click()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;"><i class="ti ti-camera" style="font-size:22px;color:var(--text-accent);" aria-hidden="true"></i>Foto do produto</button>
-    <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="lidarComFotoInput(event)" />
-    <button type="button" onclick="iniciarBuscaPorVoz()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;"><i class="ti ti-microphone" style="font-size:22px;color:var(--text-accent);" aria-hidden="true"></i>Buscar por voz</button>
-    <button type="button" onclick="document.getElementById('busca-texto').focus()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;"><i class="ti ti-keyboard" style="font-size:22px;color:var(--text-accent);" aria-hidden="true"></i>Digitar descrição</button>
-  </div>
-  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Buscas recentes</p>
-  <div id="busca-recentes-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
-</div>
-
-<div id="screen-produto" style="padding:16px;flex:1;display:none;">
-  <div id="produto-foto-wrap" style="width:100%;height:110px;background:var(--surface-1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;overflow:hidden;"><i class="ti ti-photo" style="font-size:32px;color:var(--text-muted);" aria-hidden="true"></i></div>
-  <p id="produto-nome" style="font-weight:500;font-size:17px;margin-bottom:2px;"></p>
-  <p id="produto-marca" style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;"></p>
-  <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
-    <div style="display:flex;justify-content:space-between;border-bottom:0.5px solid var(--border);padding-bottom:6px;"><span style="color:var(--text-secondary);">Código de barras</span><span id="produto-codigo"></span></div>
-    <div style="display:flex;justify-content:space-between;border-bottom:0.5px solid var(--border);padding-bottom:6px;"><span style="color:var(--text-secondary);">Embalagem</span><span id="produto-embalagem"></span></div>
-  </div>
-  <div style="background:var(--bg-accent);border-radius:var(--radius);padding:10px 12px;margin-top:14px;">
-    <p style="font-size:12px;color:var(--text-accent);margin-bottom:4px;">Argumento de venda</p>
-    <p id="produto-argumento" style="font-size:13px;"></p>
-  </div>
-</div>
-
-<div id="screen-precos" style="padding:16px;flex:1;display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface-1);border-radius:var(--radius);padding:8px 10px;margin-bottom:10px;">
-    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-      <i class="ti ti-package" style="font-size:16px;color:var(--text-secondary);flex-shrink:0;" aria-hidden="true"></i>
-      <div style="min-width:0;">
-        <p style="font-size:10px;color:var(--text-secondary);">Produto selecionado</p>
-        <p id="contexto-produto-precos" style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
-      </div>
-    </div>
-    <button type="button" onclick="show('buscar')" style="font-size:11px;padding:4px 8px;flex-shrink:0;">Trocar</button>
-  </div>
-  <div style="display:flex;align-items:flex-start;gap:6px;background:var(--bg-accent);border-radius:var(--radius);padding:8px 10px;margin-bottom:14px;">
-    <i class="ti ti-info-circle" style="font-size:14px;color:var(--text-accent);flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
-    <p style="font-size:12px;color:var(--text-accent);">Os valores abaixo são o <strong>preço de venda ao consumidor</strong> praticado pelos estabelecimentos próximos — não é o seu custo.</p>
-  </div>
-  
-</div>
-
 <div id="screen-calculadoras" style="padding:16px;flex:1;display:none;">
   <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Escolha a calculadora que quer usar</p>
   <div style="display:flex;flex-direction:column;gap:10px;">
@@ -703,9 +652,6 @@
 
 <div style="flex:1"></div>
 <div class="bottom-nav">
-  <button type="button" onclick="show('buscar')" id="nav-buscar" class="nav-btn"><i class="ti ti-search" style="font-size:21px;" aria-hidden="true"></i>Buscar</button>
-  <button type="button" onclick="show('produto')" id="nav-produto" class="nav-btn"><i class="ti ti-package" style="font-size:21px;" aria-hidden="true"></i>Produto</button>
-  <button type="button" onclick="show('precos')" id="nav-precos" class="nav-btn"><i class="ti ti-map-pin" style="font-size:21px;" aria-hidden="true"></i>Região</button>
   <button type="button" onclick="show('calculadoras')" id="nav-calculadoras" class="nav-btn"><i class="ti ti-calculator" style="font-size:21px;" aria-hidden="true"></i>Calc.</button>
   <button type="button" onclick="show('notas')" id="nav-notas" class="nav-btn"><i class="ti ti-notes" style="font-size:21px;" aria-hidden="true"></i>Notas</button>
 </div>
@@ -837,9 +783,9 @@ var notaAtualIndex = null;
 var formAnexos = [];
 var confirmandoExclusaoIndex = null;
 
-var TODAS_TELAS = ['login','buscar','produto','precos','calculadoras','preco','bonus','simulador','sellout','notas'];
-var NAV_MAP = { buscar:'nav-buscar', produto:'nav-produto', precos:'nav-precos', calculadoras:'nav-calculadoras', preco:'nav-calculadoras', bonus:'nav-calculadoras', simulador:'nav-calculadoras', sellout:'nav-calculadoras', notas:'nav-notas' };
-
+var TODAS_TELAS = ['login','calculadoras','preco','bonus','simulador','sellout','notas'];
+var NAV_MAP = { calculadoras:'nav-calculadoras', preco:'nav-calculadoras', bonus:'nav-calculadoras', simulador:'nav-calculadoras', sellout:'nav-calculadoras', notas:'nav-notas' };  
+  
 function selecionarProduto(key){
   selecionarProdutoObjeto(PRODUTOS[key]);
 }
@@ -1270,7 +1216,7 @@ if (FIREBASE_CONFIGURADO) {
       atualizarPainelConta();
       var telaLogin = document.getElementById('screen-login');
       if (estavaDeslogado && telaLogin && telaLogin.style.display !== 'none') {
-        show('buscar');
+        show('calculadoras');
       }
     }
   });
