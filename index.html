@@ -142,8 +142,8 @@
 </div>
 
 <div id="ajuda-panel" style="display:none;padding:14px 16px;border-bottom:0.5px solid var(--border);background:var(--surface-1);">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-    <button type="button" onclick="voltarMenu()" style="border:none;background:transparent;padding:2px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i></button>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;">
+    <button type="button" onclick="voltarMenu()" style="border:none;order:2;background:transparent;padding:2px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i></button>
     <p style="font-size:13px;font-weight:500;">Como usar o Negocia AI</p>
   </div>
 
@@ -195,8 +195,8 @@
 </div>
 
 <div id="config-panel" style="display:none;padding:14px 16px;border-bottom:0.5px solid var(--border);background:var(--surface-1);">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-    <button type="button" onclick="voltarMenu()" style="border:none;background:transparent;padding:2px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i></button>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+    <button type="button" onclick="voltarMenu()" style="border:none;order:2;background:transparent;padding:2px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i></button>
     <p style="font-size:13px;font-weight:500;">Ajuste de preços sugeridos</p>
   </div>
   <div style="display:flex;align-items:flex-start;gap:6px;background:var(--bg-accent);border-radius:var(--radius);padding:8px 10px;margin-bottom:12px;">
@@ -217,8 +217,8 @@
   </div>
 </div>
 
-<div id="screen-login" style="padding:28px 22px;flex:1;display:none;">
-  <button type="button" onclick="show('buscar')" style="border:none;background:transparent;padding:2px;margin-bottom:20px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+<div id="screen-login" style="padding:28px 22px;flex:1;display:none;position:relative;">
+  <button type="button" onclick="show('calculadoras')" style="position:absolute;top:16px;right:16px;border:none;background:transparent;padding:2px;margin-bottom:20px;" aria-label="Voltar"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
 
   <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:22px;">
     <div style="width:56px;height:56px;border-radius:16px;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
@@ -311,8 +311,8 @@
 </div>
 
 <div id="screen-bonus" style="padding:16px;flex:1;display:none;">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-    <button type="button" onclick="show('calculadoras')" style="border:none;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;">
+    <button type="button" onclick="show('calculadoras')" style="border:none;order:2;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
     <span style="font-weight:500;font-size:15px;">Bonificação</span>
   </div>
   <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px;">
@@ -339,20 +339,6 @@
     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-top:4px;"><span>Custo efetivo/caixa</span><span id="b-custocx"></span></div>
   </div>
 
-  <button type="button" onclick="toggleSecaoProdutoBonus()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface-1);border-radius:var(--radius);margin-bottom:8px;">
-    <span style="font-size:13px;font-weight:500;">Produto selecionado</span>
-    <i id="icon-secao-produto-bonus" class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
-  </button>
-  <div id="secao-produto-bonus" style="display:none;margin-bottom:14px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface-1);border-radius:var(--radius);padding:8px 10px;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-        <i class="ti ti-package" style="font-size:16px;color:var(--text-secondary);flex-shrink:0;" aria-hidden="true"></i>
-        <div style="min-width:0;">
-          <p style="font-size:10px;color:var(--text-secondary);">Produto</p>
-          <p id="contexto-produto-bonus" style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
-        </div>
-      </div>
-    </div>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Preços sugeridos com base no custo efetivo</p>
     <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
       <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;">
@@ -394,8 +380,8 @@
 </div>
 
 <div id="screen-simulador" style="padding:16px;flex:1;display:none;">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-    <button type="button" onclick="show('calculadoras')" style="border:none;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;">
+    <button type="button" onclick="show('calculadoras')" style="border:none;order:2;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
     <span style="font-weight:500;font-size:15px;">Margem/Mark Up</span>
   </div>
   <label style="font-size:12px;color:var(--text-secondary);">Custo do produto</label>
@@ -455,8 +441,8 @@
 </div>
 
 <div id="screen-sellout" style="padding:16px;flex:1;display:none;">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-    <button type="button" onclick="show('calculadoras')" style="border:none;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;">
+    <button type="button" onclick="show('calculadoras')" style="border:none;order:2;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
     <span style="font-weight:500;font-size:15px;">Sell Out</span>
   </div>
   <label style="font-size:12px;color:var(--text-secondary);">Custo do produto</label>
