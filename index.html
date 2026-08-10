@@ -283,14 +283,6 @@
 <div id="screen-calculadoras" style="padding:16px;flex:1;">
   <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Escolha a calculadora que quer usar</p>
   <div style="display:flex;flex-direction:column;gap:10px;">
-    <button type="button" onclick="show('preco')" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px;text-align:left;">
-      <div style="width:40px;height:40px;border-radius:10px;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-calculator" style="font-size:20px;color:var(--text-accent);" aria-hidden="true"></i></div>
-      <div style="flex:1;">
-        <p style="font-size:14px;font-weight:500;">Preço</p>
-        <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Preços sugeridos por faixa (baixo/competitivo/alto)</p>
-      </div>
-      <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-muted);flex-shrink:0;" aria-hidden="true"></i>
-    </button>
     <button type="button" onclick="show('bonus')" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px;text-align:left;">
       <div style="width:40px;height:40px;border-radius:10px;background:var(--bg-warning);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-gift" style="font-size:20px;color:var(--text-warning);" aria-hidden="true"></i></div>
       <div style="flex:1;">
@@ -315,45 +307,6 @@
       </div>
       <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-muted);flex-shrink:0;" aria-hidden="true"></i>
     </button>
-  </div>
-</div>
-
-<div id="screen-preco" style="padding:16px;flex:1;display:none;">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-    <button type="button" onclick="show('calculadoras')" style="border:none;background:transparent;padding:2px;" aria-label="Voltar para calculadoras"><i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i></button>
-    <span style="font-weight:500;font-size:15px;">Preço</span>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface-1);border-radius:var(--radius);padding:8px 10px;margin-bottom:14px;">
-    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-      <i class="ti ti-package" style="font-size:16px;color:var(--text-secondary);flex-shrink:0;" aria-hidden="true"></i>
-      <div style="min-width:0;">
-        <p style="font-size:10px;color:var(--text-secondary);">Produto selecionado</p>
-        <p id="contexto-produto-preco" style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
-      </div>
-    </div>
-  </div>
-  <label style="font-size:13px;color:var(--text-secondary);">Preço de custo</label>
-  <input type="number" id="custo" value="6.50" step="0.01" style="margin:4px 0 14px;" oninput="calc()" />
-  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
-    <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-      <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">Preço baixo</span><span id="p-baixo" style="font-size:15px;font-weight:500;"></span></div>
-      <p id="m-baixo" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></p>
-    </div>
-    <div style="border:2px solid var(--border-accent);border-radius:var(--radius);padding:10px 12px;">
-      <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">Preço competitivo</span><span id="p-comp" style="font-size:15px;font-weight:500;"></span></div>
-      <p id="m-comp" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></p>
-    </div>
-    <div style="border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-      <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">Preço alto</span><span id="p-alto" style="font-size:15px;font-weight:500;"></span></div>
-      <p id="m-alto" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></p>
-    </div>
-  </div>
-
-  <p style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Preço de venda determinado pelo cliente</p>
-  <input type="number" id="precoCliente" value="9.00" step="0.01" style="margin-bottom:8px;" oninput="calc()" />
-  <div style="border:0.5px solid var(--border-strong);border-radius:var(--radius);padding:10px 12px;">
-    <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">Preço do cliente</span><span id="p-cliente" style="font-size:15px;font-weight:500;"></span></div>
-    <p id="m-cliente" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></p>
   </div>
 </div>
 
@@ -781,8 +734,8 @@ var notaAtualIndex = null;
 var formAnexos = [];
 var confirmandoExclusaoIndex = null;
 
-var TODAS_TELAS = ['login','calculadoras','preco','bonus','simulador','sellout','notas'];
-var NAV_MAP = { calculadoras:'nav-calculadoras', preco:'nav-calculadoras', bonus:'nav-calculadoras', simulador:'nav-calculadoras', sellout:'nav-calculadoras', notas:'nav-notas' };  
+var TODAS_TELAS = ['login','calculadoras','bonus','simulador','sellout','notas'];
+var NAV_MAP = { calculadoras:'nav-calculadoras', bonus:'nav-calculadoras', simulador:'nav-calculadoras', sellout:'nav-calculadoras', notas:'nav-notas' };
   
 function selecionarProduto(key){
   selecionarProdutoObjeto(PRODUTOS[key]);
