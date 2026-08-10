@@ -850,6 +850,9 @@ function calcBonusItem(it){
   if (acao.length===0) acao.push('Sem promoção comercial');
   var unidadesTotais = it.caixas*it.unid;
   var custoUsado = it.custoBase==='abatimento' ? custoEfetivo : it.custo;
+  var margem = it.preco>0 ? ((it.preco-custoUsado)/it.preco*100) : 0;
+  var markup = custoUsado>0 ? ((it.preco-custoUsado)/custoUsado*100) : 0;
+  var valorDiferenca = it.preco-custoUsado;
   var valorTotalProduto = custoUsado*unidadesTotais;
   var valorTotalAcao = promoTotal*it.unid*it.custo;
   return {
@@ -857,7 +860,10 @@ function calcBonusItem(it){
     acaoTexto: acao.join(' + '),
     unidadesTotais: unidadesTotais,
     valorTotalProduto: valorTotalProduto,
-    valorTotalAcao: valorTotalAcao
+    valorTotalAcao: valorTotalAcao,
+    margem: margem,
+  markup: markup,
+  valorDiferenca: valorDiferenca
   };
 }
 
@@ -925,6 +931,8 @@ function renderItemPedidoHtml(it, d){
       '<div style="display:flex;justify-content:space-between;"><span>Preço fora de ação</span><span>' + fmt(it.preco) + '</span></div>' +
       '<div style="display:flex;justify-content:space-between;"><span>Ação realizada</span><span style="text-align:right;">' + escapeHtml(d.acaoTexto) + '</span></div>' +
       '<div style="display:flex;justify-content:space-between;"><span>Custo final do produto</span><span>' + fmt(d.custoEfetivo) + '</span></div>' +
+                '<div style="display:flex;justify-content:space-between;"><span>Margem</span><span>' + d.margem.toFixed(1).replace('.',',') + '% · ' + fmt(d.valorDiferenca) + '</span></div>' +
+          '<div style="display:flex;justify-content:space-between;"><span>Markup</span><span>' + d.markup.toFixed(1).replace('.',',') + '% · ' + fmt(d.valorDiferenca) + '</span></div>' +
       '<div style="display:flex;justify-content:space-between;"><span>Valor do pedido (' + (it.custoBase==='abatimento' ? 'c/ abatimento' : 'custo inicial') + ')</span><span style="font-weight:500;">' + fmt(d.valorTotalProduto) + '</span></div>' +
       '<div style="display:flex;justify-content:space-between;"><span>Valor investido na ação</span><span>' + fmt(d.valorTotalAcao) + '</span></div>';
   } else {
