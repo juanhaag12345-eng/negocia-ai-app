@@ -1460,6 +1460,7 @@ function show(name){
   TODAS_TELAS.forEach(function(s){
     document.getElementById('screen-'+s).style.display = (s===name) ? 'block' : 'none';
   });
+  if (name === 'pedidos' && typeof renderPedidos === 'function') renderPedidos();
         ['nav-buscar','nav-produto','nav-precos','nav-calculadoras','nav-notas','nav-pedidos'].forEach(function(id){
     var btn = document.getElementById(id);
     if (btn) btn.style.color = '';
